@@ -1,0 +1,67 @@
+{% extends 'Notes/base.html' %}
+{% load static %}
+{% load note_tags %}
+{% block content %}
+  <div class="editable">
+    <div class="edit-buttons">
+      <button onclick="document.execCommand('bold',false,1);">Bold</button>
+    </div>
+    <div class="header">
+      <h2 contenteditable="" class="editable">My Header</h2>
+    </div>
+
+    {% for note in Notes %}
+    <div class="content editable">
+      <div contenteditable="" class="editable">{{note.content|safe}}</div>
+    </div>
+    {% endfor %}
+  </div>
+{% endblock content %}
+
+{% block extra_script %}
+  <script type="text/javascript">
+    var editables = document.querySelectorAll(".editable")
+    for (var i = 0; i < editables.length; i++) {
+      editables[i].addEventListener('blur', function() {
+        var html_value = this.innerHTML;
+
+        $.ajax({
+          type: "GET",
+          url: '{% url "update-notes" %}',
+          data:{
+            my_data:html_value,
+          },
+          dataType: 'json',
+          success: function (data){
+            if (data.msg == 'success'){
+              console.log("success")
+            }
+          }
+        });
+      });
+    }
+  </script>
+{% endblock extra_script %}
+
+<div class="cell-row">
+ <div class="note-cell cell-column">
+   <div class="note-toolbar">
+     <button type="button">font</button>
+     <button type="button">Color</button>
+   </div>
+   <div class="editable" contenteditable="">
+     <div>
+       
+     </div>
+   </div>
+ </div>
+ <div class="add-cell">
+   <div>
+     <div class="add-buttons">
+       <button type="button" onclick="add_cell(event)">Add</button>
+       <button type="button">Remove</button>
+     </div>
+     <hr class="h-guide">
+   </div>
+ </div>
+</div>
