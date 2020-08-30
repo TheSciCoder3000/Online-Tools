@@ -1,16 +1,14 @@
 {% extends 'Notes\base.html' %}
+{% load static %}
 {% load note_tags %}
 {% block content %}
 
 <div class="wrapper">
   <div class="sidebar">
     <h2>My Notes</h2>
-    <ul>
-      <li><a href="">Math</a></li>
-      <li><a href="">English</a></li>
-      <li><a href="">Science</a></li>
-      <li><a href="">Physics</a></li>
-    </ul>
+    {% for folder in Folders|get_root_folders %}
+      {% include 'Notes/folder_template.html' with Folder=folder %}
+    {% endfor %}
   </div>
 
   <div class="main-content">
@@ -23,9 +21,11 @@
     </div>
     <hr class="divider">
     <div class="info">
-      {% for note in Notes %}
-        {{ note.content|safe }}
-      {% endfor %}
+      <div class="paper">
+        <div class="left-ruler"></div>
+        <div class="note-content" filename="">
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -33,57 +33,39 @@
 {% endblock %}
 
 {% block extra_script %}
-
+<!-- Logic Script -->
+<script type="text/javascript" src="{% static 'js/shortcuts.js' %}"></script>
 <script type="text/javascript">
+  var note_added = true;
+  var current_note = '';
+
   $('.info').bind('DOMSubtreeModified', function(){
-    console.log('changed');
-    document.querySelector('.changes-button').style.display = "block";
+    if (note_added) {
+      note_added = false
+      current_note = document.querySelector('.note-content').innerHTML
+    } else if (current_note != document.querySelector('.note-content').innerHTML) {
+      document.querySelector('.changes-button').style.display = "block";
+    } else if (current_note == document.querySelector('.note-content').innerHTML) {
+      document.querySelector('.changes-button').style.display = "none";
+    }
   });
 
-  function add_cell(e){
-    var parent_cell = e.target.parentNode.parentNode.parentNode.parentNode;
-    $(`
-      <div class="cell-row">
-        <div class="note-cell cell-column">
-          <div class="note-toolbar">
-            <button onclick="bold_text()" type="button">Bold</button>
-            <button onclick="italic_text()" type="button">Italic</button>
-            <button onclick="add_column(event)" type="button">Add</button>
-            <button onclick="delete_row(event)" type="button">Delete</button>
-           </div>
-          <div class="editable" contenteditable="">
-            <div>
-
-            </div>
-           </div>
-         </div>
-        <div class="add-cell">
-          <div>
-            <div class="add-buttons">
-              <button type="button" onclick="add_cell(event)">Add</button>
-              <button type="button">Remove</button>
-             </div>
-            <hr class="h-guide">
-           </div>
-         </div>
-       </div>
-      `).insertAfter(parent_cell);
-    console.log(parent_cell)
-  }
-
   function save_changes(){
-    var content = document.querySelector('.info').innerHTML
+    var content = document.querySelector('.note-content').innerHTML;
+    var changes_filename = document.querySelector('.note-content').getAttribute("filename")
     $.ajax({
       type: "GET",
       url: '{% url "update-notes" %}',
       data:{
         my_data:content,
+        data_filename: changes_filename,
       },
       dataType: 'json',
       success: function (data){
         if (data.msg == 'success'){
           console.log("success");
-          location.reload();
+          document.querySelector('.changes-button').style.display = "none";
+          current_note = document.querySelector('.note-content').innerHTML
         }
       }
     });
@@ -92,37 +74,95 @@
     location.reload();
   }
 
-  function delete_row(e){
-    var parent_cell = e.target.parentNode.parentNode.parentNode
-    parent_cell.remove();
-  }
-
+  //Text Manipulation
   function bold_text(){
     document.execCommand('bold',false,1);
   }
   function italic_text(){
     document.execCommand('italic',false,1);
   }
-  function add_column(e){
-    var parent_cellRow = e.target.parentNode.parentNode.parentNode
-    var cell_column = e.target.parentNode.parentNode
-    var new_column_cell = `
-    <div class="note-cell cell-column">
-      <div class="note-toolbar">
-        <button onclick="bold_text()" type="button">Bold</button>
-        <button onclick="italic_text()" type="button">Italic</button>
-        <button onclick="add_column(event)" type="button">Add</button>
-        <button onclick="delete_row(event)" type="button">Delete</button>
-       </div>
-      <div class="editable" contenteditable="">
-        <div>
+  function underline_text(){
+    document.execCommand('underline',false,1);
+  }
+  function highlight_text(){
+    var text = document.getSelection().toString()
 
-        </div>
-       </div>
-     </div>
-    `
-    $(new_column_cell).insertAfter(cell_column);
+    var span = document.createElement('SPAN');
+    span.setAttribute("class", "highlight-class");
+    span.textContent = text;
+
+    var range = document.getSelection().getRangeAt(0);
+    range.deleteContents();
+    range.insertNode(span);
+  }
+
+  //Cell Manipulation
+  function add_row(){
+    var active_elem = document.activeElement
+    if (active_elem.classList.toString() == "cell-column"){
+      var new_row = `<div class="cell-row"><div class="cell-column" contenteditable></div></div>`
+      $(new_row).insertAfter(active_elem.parentNode);
+      active_elem.parentNode.nextSibling.childNodes[0].focus();
+    }
+  }
+  function add_column(){
+    var active_elem = document.activeElement
+    if (active_elem.classList.toString() == "cell-column"){
+      var new_column = `<div class="cell-column" contenteditable></div>`
+      $(new_column).insertAfter(active_elem);
+      active_elem.nextSibling.focus();
+    }
+  }
+  function delete_cell(){
+    var active_elem = document.activeElement
+    if (active_elem.classList.toString() == "cell-column"){
+      if (active_elem.parentNode.childElementCount < 2) {
+        active_elem.parentNode.remove();
+      } else {
+        active_elem.remove();
+      }
+    }
+  }
+
+  function get_file(e, filename){
+    console.log('getting file from server');
+    $.ajax({
+      type: "GET",
+      url: '{% url "get-notes" %}',
+      data:{
+        note_data:filename,
+      },
+      dataType: 'json',
+      success: function (data){
+        if (data.msg == 'success'){
+          var content_area = document.querySelector('.note-content');
+          content_area.setAttribute("filename", filename);
+          note_added = true;
+          content_area.innerHTML = data.note_content;
+        }
+      }
+    });
   }
 </script>
 
+<!-- Style Script -->
+<script type="text/javascript">
+  $(document).ready(function(){
+    var chBoxes = document.querySelectorAll(".folder-checkbox");
+    for (var i = 0; i < chBoxes.length; i++) {
+      chBoxes[i].checked = false;
+    }
+  });
+
+  function open_child(e){
+    if (e.target.tagName == 'INPUT') {
+      var child_nodes = e.target.parentNode.parentNode.querySelector(".child-container")
+      if (child_nodes.style.display == "block") {
+        child_nodes.style.display = "none";
+      } else {
+        child_nodes.style.display = "block";
+      }
+    }
+  }
+</script>
 {% endblock extra_script %}

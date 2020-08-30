@@ -1,0 +1,14 @@
+{% load note_tags %}
+<div class="folder-tree-container">
+  <label class="folders-container" onclick="open_child(event)">
+    <input type="checkbox" class="folder-checkbox"><span>{{ Folder.name }}</span>
+  </label>
+  <div class="child-container">
+    {% for child in Folder|get_child_folders %}
+      {% include 'Notes/folder_template.html' with Folder=child %}
+    {% endfor %}
+    {% for child in Folder|get_child_notes %}
+      {% include 'Notes/file_template.html' with File=child %}
+    {% endfor %}
+  </div>
+</div>
