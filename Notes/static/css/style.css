@@ -5,6 +5,12 @@ html, body{
   padding: 0px;
   overflow-x: hidden;
 }
+ul{
+  padding: 0px;
+}
+ul > li{
+  list-style-type: none;
+}
 .horizontal{
   width: 1px;
   height: 100%;
@@ -30,6 +36,7 @@ html, body{
   background: #f0f0f0;
   color: black;
   height: 100%;
+  font-size: 1.5rem;
   border-right: 5px solid #000000;
 }
 .sidebar > h2{
@@ -38,26 +45,36 @@ html, body{
 .folders-container{
   display: flex;
   align-items: center;
+  cursor: pointer;
+  pointer-events: all;
 }
 .file-container{
   width: 100%;
-  display: flex;
+  font-size: 1rem;
   align-items: center;
   border: none;
 }
-.file-container:focus{
+.label-container{
+  pointer-events: none;
+  display: flex;
+  z-index: 21;
+}
+.obj-selected > label{
   background: rgba(79, 79, 79, 0.15);
 }
+div.obj-selected > div > button{
+  background: rgba(79, 79, 79, 0.15);
+}
+
 .file-icon:after{
   margin-right: 0.5rem;
   font-family: "Font Awesome 5 Free";
   font-weight: 900;
   content:  "\f15b";
-  font-size: 0.8rem;
+  font-size: 1rem;
   display: block;
 }
 .folders-container:focus-within{
-  background: rgba(79, 79, 79, 0.15);
 }
 
 .folder-checkbox{
@@ -76,7 +93,7 @@ html, body{
   font-family: "Font Awesome 5 Free";
   font-weight: 900;
   content:  "\f0de";
-  font-size: 0.8rem;
+  font-size: 1.2rem;
   color: black;
   display: block;
   transform: rotate(90deg);
@@ -88,6 +105,53 @@ html, body{
 
 .child-container{
   margin-left: 1rem;
+  display: none;
+}
+#modal-container{
+  height: 100%;
+  width: 100%;
+  position: fixed;
+  z-index: 21;
+  display: none;
+}
+#modal{
+  max-width: 60%;
+  background: white;
+  padding: 1rem 1.5rem 1rem;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  position: fixed;
+}
+#modal-text{
+  font-size: 1.5rem;
+}
+input.modal-input{
+  width: 25rem;
+  height: 1.5rem;
+}
+button[name="close-btn"]::after{
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  content:  "\f00d";
+  font-size: 1rem;
+  color: black;
+}
+button[name="close-btn"]{
+  border: none;
+  background: white;
+  right: 1rem;
+  position: inherit;
+}
+button[name="close-btn"]:hover{
+  cursor: pointer;
+  background: rgb(194, 194, 194);
+}
+.overlay{
+  background: rgba(0, 0, 0, 0.54);
+  height: 100%;
+}
+#folder-root{
   display: none;
 }
 
@@ -138,7 +202,7 @@ html, body{
 .cell-column{
   flex: 1;
   margin-left: 10px;
-  margin-right: 10px;
+  margin-right: 20px;
   min-height: 50px;
   font-size: 2.6rem;
   padding-top: 0px;

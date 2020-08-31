@@ -2,33 +2,46 @@
 {% load static %}
 {% load note_tags %}
 {% block content %}
-
-<div class="wrapper">
-  <div class="sidebar">
-    <h2>My Notes</h2>
-    {% for folder in Folders|get_root_folders %}
-      {% include 'Notes/folder_template.html' with Folder=folder %}
-    {% endfor %}
+  <div id="modal-container">
+    <div class="overlay"></div>
+    <div id="modal">
+      <button type="button" name="close-btn" onclick="close_modal()"></button>
+      <div id="modal-text">content</div>
+      <form id="modal-form" action="{% url 'update-folders' %}" method="post">{% csrf_token %}
+        {{ FolderForm.name }}
+        <input id="folder-root" type="text" value="">
+        <button id="modal-form-btn" rootFolder="" type="button" onclick="add_obj(event)">OK</button>
+      </form>
+    </div>
   </div>
+  <div class="wrapper">
+    <div class="sidebar">
+      <h2>My Notes</h2>
+      <div>
+        {% for folder in Folders|get_root_folders %}
+          {% include 'Notes/folder_template.html' with Folder=folder %}
+        {% endfor %}
+      </div>
+    </div>
 
-  <div class="main-content">
-    <div class="changes-button">
-      <button onclick="save_changes()" type="button" name="save-changes">Save</button>
-      <button onclick="cancel_changes()" type="button" name="cancel-changes">Cancel</button>
-    </div>
-    <div class="header editable">
-      <h2 contenteditable="true">Welcome to My Notes</h2>
-    </div>
-    <hr class="divider">
-    <div class="info">
-      <div class="paper">
-        <div class="left-ruler"></div>
-        <div class="note-content" filename="">
+    <div class="main-content">
+      <div class="changes-button">
+        <button onclick="save_changes()" type="button" name="save-changes">Save</button>
+        <button onclick="cancel_changes()" type="button" name="cancel-changes">Cancel</button>
+      </div>
+      <div class="header editable">
+        <h2 contenteditable="true">Welcome to My Notes</h2>
+      </div>
+      <hr class="divider">
+      <div class="info">
+        <div class="paper">
+          <div class="left-ruler"></div>
+          <div class="note-content" filename="">
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
 
 {% endblock %}
 
@@ -124,6 +137,72 @@
     }
   }
 
+  //File and Folder Manipulation
+  function add_file(folder){
+    console.log(folder.getAttribute("foldername"));
+    $.ajax({
+        url: "{% url 'update-folders' %}",
+        type: 'POST',
+        data: {
+          csrfmiddlewaretoken: '{{csrf_token}}',
+          Foldername: folder.getAttribute("foldername")
+        },
+        dataType: 'json',
+        success: function(response) {
+          console.log(response.msg);
+        }
+    });
+  }
+  function get_root_folder(folder){
+    var parent = folder.parentNode.parentNode;
+    if (parent.getAttribute('foldername')) {
+      return parent.getAttribute('foldername');
+    } else {
+      return null;
+    }
+  }
+
+  function add_obj(e){
+    update_tree_request("{% url 'update-folders' %}",
+                        'Add', e.target.getAttribute('create'),
+                        e.target.getAttribute('rootFolder'),
+                        $('#folder-root').val(),
+                        $('.modal-input').val());
+  }
+  function delete_obj(objType, grandRoot, RootFolder, objName) {
+    update_tree_request("{% url 'update-folders' %}",
+                        'Delete', objType,
+                        grandRoot,
+                        RootFolder,
+                        objName);
+  }
+  function update_tree_request(url_req, act, create_obj, grandroot, root, objName){
+    $.ajax({
+        url: url_req,
+        type: 'POST',
+        data: {
+          csrfmiddlewaretoken: '{{ csrf_token }}',
+          action: act,
+          create_method: create_obj,
+          root_root: grandroot,
+          root: root,
+          name: objName,
+        },
+        success: function(response) {
+          document.querySelector('#modal-container').style.display = "none";
+          $.get('{% url "home" %}', function(data) {
+            var my_element = response.folder_id
+            $(my_element).replaceWith($(my_element, data));
+          });
+        }
+    });
+
+  }
+
+  function close_modal(){
+    document.querySelector('#modal-container').style.display = "none";
+  }
+
   function get_file(e, filename){
     console.log('getting file from server');
     $.ajax({
@@ -153,15 +232,40 @@
       chBoxes[i].checked = false;
     }
   });
-
+  function selectObject(object) {
+    var obj_selected = document.querySelectorAll('.obj-selected')
+    for (var i = 0; i < obj_selected.length; i++) {
+      if (!window.ctrl_pressed) {
+        obj_selected[i].classList.remove('obj-selected');
+      }
+    }
+    if (object.classList.contains('obj-selected')) {
+      object.classList.remove('obj-selected');
+    }else {
+      console.log(object);
+      object.classList.add('obj-selected');
+    }
+  }
   function open_child(e){
     if (e.target.tagName == 'INPUT') {
-      var child_nodes = e.target.parentNode.parentNode.querySelector(".child-container")
-      if (child_nodes.style.display == "block") {
-        child_nodes.style.display = "none";
-      } else {
-        child_nodes.style.display = "block";
+      var folder_node = e.target.parentNode.parentNode
+      var child_nodes = folder_node.querySelector(".child-container")
+
+      if (!window.ctrl_pressed) {
+        // Show selected
+        if (child_nodes.style.display == "block") {
+          child_nodes.style.display = "none";
+        } else {
+          child_nodes.style.display = "block";
+        }
+      }else {
+        if (e.target.checked) {
+          e.target.checked = false;
+        }else {
+          e.target.checked = true;
+        }
       }
+      selectObject(folder_node);
     }
   }
 </script>

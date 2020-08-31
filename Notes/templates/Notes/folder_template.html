@@ -1,5 +1,5 @@
 {% load note_tags %}
-<div class="folder-tree-container">
+<div type="Folder" id="{{ Folder.pk }}"  class="folder-tree-container" foldername="{{ Folder.name }}">
   <label class="folders-container" onclick="open_child(event)">
     <input type="checkbox" class="folder-checkbox"><span>{{ Folder.name }}</span>
   </label>
