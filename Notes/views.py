@@ -15,8 +15,8 @@ def home(request):
 
 def update_notes(request):
     if request.is_ajax():
-        note = Notes.objects.get(name=request.GET['data_filename'])
-        note.content = request.GET['my_data']
+        note = Notes.objects.get(name=request.POST['data_filename'])
+        note.content = request.POST['my_data']
         note.save()
 
         return JsonResponse({
@@ -27,7 +27,7 @@ def update_folder_tree(request):
     if request.method == 'POST':
         print(request.POST)
         def get_root_root(foldername):
-            if not foldername == '':
+            if not (foldername == '' or foldername == 'null'):
                 return Folders.objects.get(name=foldername)
             else:
                 return None
@@ -45,6 +45,7 @@ def update_folder_tree(request):
                 print(request.POST.get('name'))
                 Notes.objects.get(root=folder_root,name=request.POST.get('name')).delete()
         else:
+            print('\n\nAdding\n\n')
             if request.POST.get('create_method') == 'Folder':
                 cre_obj = Folders(root=folder_root,
                                  name=request.POST.get('name'))

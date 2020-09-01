@@ -48,6 +48,7 @@
 {% block extra_script %}
 <!-- Logic Script -->
 <script type="text/javascript" src="{% static 'js/shortcuts.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/detection.js' %}"></script>
 <script type="text/javascript">
   var note_added = true;
   var current_note = '';
@@ -67,9 +68,10 @@
     var content = document.querySelector('.note-content').innerHTML;
     var changes_filename = document.querySelector('.note-content').getAttribute("filename")
     $.ajax({
-      type: "GET",
+      type: "POST",
       url: '{% url "update-notes" %}',
       data:{
+        csrfmiddlewaretoken: '{{csrf_token}}',
         my_data:content,
         data_filename: changes_filename,
       },
@@ -242,11 +244,11 @@
     if (object.classList.contains('obj-selected')) {
       object.classList.remove('obj-selected');
     }else {
-      console.log(object);
       object.classList.add('obj-selected');
     }
   }
   function open_child(e){
+    console.log(e.target)
     if (e.target.tagName == 'INPUT') {
       var folder_node = e.target.parentNode.parentNode
       var child_nodes = folder_node.querySelector(".child-container")
