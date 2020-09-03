@@ -25,12 +25,24 @@
     </div>
 
     <div class="main-content">
+      <div class="text-format-btns">
+        <div id="format-btns">
+          <button class="formatin btn-pointer" onclick="bold_text()">B</button>
+          <button class="formatin btn-pointer" onclick="italic_text()">I</button>
+          <button class="formatin btn-pointer" onclick="underline_text()">U</button>
+          <button class="formatin btn-pointer" onclick="highlight_text()">H</button>
+          <input id="highlighter" type="color" name="" value="#ecf041">
+        </div>
+        <div id="chevron-btn">
+          <button class="btn-pointer" onclick="toggle_fomat()" name="display-btns"></button>
+        </div>
+      </div>
       <div class="changes-button">
         <button onclick="save_changes()" type="button" name="save-changes">Save</button>
         <button onclick="cancel_changes()" type="button" name="cancel-changes">Cancel</button>
       </div>
-      <div class="header editable">
-        <h2 contenteditable="true">Welcome to My Notes</h2>
+      <div id="header">
+        <h2>Welcome to My Notes</h2>
       </div>
       <hr class="divider">
       <div class="info">
@@ -47,33 +59,33 @@
 
 {% block extra_script %}
 <!-- Logic Script -->
-<script type="text/javascript" src="{% static 'js/shortcuts.js' %}"></script>
-<script type="text/javascript" src="{% static 'js/detection.js' %}"></script>
-<script type="text/javascript">
-  var note_added = true;
-  var current_note = '';
+<script src="{% static 'js/shortcuts.js' %}"></script>
+<script src="{% static 'js/detection.js' %}"></script>
+<script>
+  window.note_added = true;
+   var note_content = '';
 
-  $('.info').bind('DOMSubtreeModified', function(){
-    if (note_added) {
-      note_added = false
-      current_note = document.querySelector('.note-content').innerHTML
-    } else if (current_note != document.querySelector('.note-content').innerHTML) {
-      document.querySelector('.changes-button').style.display = "block";
-    } else if (current_note == document.querySelector('.note-content').innerHTML) {
-      document.querySelector('.changes-button').style.display = "none";
+  $('.note-content').bind('DOMSubtreeModified', function(){
+    resize_img()
+    if (window.check_content) {
+      if (note_content == document.querySelector('.note-content').innerHTML) {
+        document.querySelector('.changes-button').style.display = "none";
+      } else if (note_content  != document.querySelector('.note-content').innerHTML) {
+        document.querySelector('.changes-button').style.display = "block";
+      }
     }
   });
 
   function save_changes(){
     var content = document.querySelector('.note-content').innerHTML;
-    var changes_filename = document.querySelector('.note-content').getAttribute("filename")
+    var file_pk = document.querySelector('.note-content').getAttribute("filePK")
     $.ajax({
       type: "POST",
       url: '{% url "update-notes" %}',
       data:{
         csrfmiddlewaretoken: '{{csrf_token}}',
         my_data:content,
-        data_filename: changes_filename,
+        data_pk:file_pk,
       },
       dataType: 'json',
       success: function (data){
@@ -86,7 +98,9 @@
     });
   }
   function cancel_changes(){
-    location.reload();
+    if (confirm('Are you sure you want to cancel all changes?')) {
+      document.querySelector('.note-content').innerHTML = note_content
+    }
   }
 
   //Text Manipulation
@@ -101,9 +115,10 @@
   }
   function highlight_text(){
     var text = document.getSelection().toString()
+    var h_color = document.getElementById('highlighter').value
 
     var span = document.createElement('SPAN');
-    span.setAttribute("class", "highlight-class");
+    span.style.background = h_color;
     span.textContent = text;
 
     var range = document.getSelection().getRangeAt(0);
@@ -192,10 +207,15 @@
         },
         success: function(response) {
           document.querySelector('#modal-container').style.display = "none";
-          $.get('{% url "home" %}', function(data) {
+          $.get('/notes/', function(data) {
             var my_element = response.folder_id
             $(my_element).replaceWith($(my_element, data));
           });
+          if (document.getElementById('header').innerText == objName) {
+            window.check_content = false
+            document.querySelector('.note-content').innerHTML = ''
+            document.querySelector('#header h2').innerHTML = ''
+          }
         }
     });
 
@@ -205,21 +225,24 @@
     document.querySelector('#modal-container').style.display = "none";
   }
 
-  function get_file(e, filename){
-    console.log('getting file from server');
+  function get_file(filename, file_pk){
+    window.check_content = false
     $.ajax({
       type: "GET",
       url: '{% url "get-notes" %}',
       data:{
-        note_data:filename,
+        note_pk:file_pk
       },
       dataType: 'json',
       success: function (data){
         if (data.msg == 'success'){
+          console.log('note received');
+          document.querySelector("#header h2").innerText = filename
           var content_area = document.querySelector('.note-content');
-          content_area.setAttribute("filename", filename);
-          note_added = true;
+          content_area.setAttribute("filePK", file_pk)
           content_area.innerHTML = data.note_content;
+          note_content = content_area.innerHTML
+          window.check_content = true;
         }
       }
     });
@@ -227,7 +250,19 @@
 </script>
 
 <!-- Style Script -->
-<script type="text/javascript">
+<script>
+  function resize_img(){
+    var heights = document.querySelectorAll('.cell-column')
+    for (var i = 0; i < heights.length; i++) {
+      var height = heights[i].offsetHeight
+      if ((height%50) != 0) {
+        console.log(height)
+        var new_h = (height + (50 - (height%50)))
+        heights[i].style.height = new_h+"px"
+      }
+    }
+  }
+
   $(document).ready(function(){
     var chBoxes = document.querySelectorAll(".folder-checkbox");
     for (var i = 0; i < chBoxes.length; i++) {
@@ -248,7 +283,6 @@
     }
   }
   function open_child(e){
-    console.log(e.target)
     if (e.target.tagName == 'INPUT') {
       var folder_node = e.target.parentNode.parentNode
       var child_nodes = folder_node.querySelector(".child-container")
@@ -268,6 +302,17 @@
         }
       }
       selectObject(folder_node);
+    }
+  }
+
+  function toggle_fomat(){
+    var format_container = document.querySelector('#format-btns')
+    if (format_container.offsetHeight == "0") {
+      format_container.style.height = "2rem";
+      format_container.style.padding = "1rem";
+    } else {
+      format_container.style.height = "0px";
+      format_container.style.padding = "0px";
     }
   }
 </script>

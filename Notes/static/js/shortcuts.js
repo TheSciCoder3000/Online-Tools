@@ -7,6 +7,10 @@ window.onkeydown = function(e){
     bold_text();
     e.preventDefault();
   }
+  if (e.ctrlKey && e.which == 83){// Bold HK
+    save_changes();
+    e.preventDefault();
+  }
   if (e.ctrlKey && e.which == 73 && !(e.shiftKey)){// Italic HK
     italic_text();
     e.preventDefault();

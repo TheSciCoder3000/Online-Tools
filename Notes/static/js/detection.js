@@ -10,7 +10,9 @@ function match(input, obj) {
 
 function replace_template(id_num){
     return `
-      <div id="list-${id_num}" class="list-type"> My list </div>
+      <li id="list-${id_num}" class="list-type">
+       My list
+      </li>
     `
 }
 
@@ -35,7 +37,7 @@ $(document).on('keydown', '.cell-column', function (e){
     var idN = document.querySelectorAll('.list-type').length
     e.target.innerHTML = e.target.innerHTML.replace('//list', replace_template(idN+1))
 
-    var list_target = document.getElementById('list-'+(idN+1))
+    var list_target = document.querySelector('#list-'+(idN+1)+' li')
     setCaret(list_target)
   }
 });

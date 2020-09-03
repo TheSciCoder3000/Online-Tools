@@ -12,7 +12,7 @@ class Tags(models.Model):
 class Folders(models.Model):
     root = models.ForeignKey('self', on_delete=models.CASCADE, null=True,
                              blank=True, default='root')
-    name = models.CharField(max_length=20, null=True, default='New Folder')
+    name = models.CharField(max_length=100, null=True, default='New Folder')
     details = models.TextField(null=True, blank=True)
     tags = models.ManyToManyField(Tags, blank=True)
 

@@ -5,11 +5,9 @@ html, body{
   padding: 0px;
   overflow-x: hidden;
 }
-ul{
-  padding: 0px;
-}
-ul > li{
-  list-style-type: none;
+:root {
+  --sidebar-width: 15%;
+  --line-height: 50px;
 }
 .horizontal{
   width: 1px;
@@ -31,8 +29,7 @@ ul > li{
 
 /* Sidebar Styles */
 .sidebar{
-  width: 300px;
-  max-width: 25%;
+  min-width: var(--sidebar-width);
   background: #f0f0f0;
   color: black;
   height: 100%;
@@ -44,8 +41,9 @@ ul > li{
 }
 .folders-container{
   display: flex;
-  align-items: center;
+  align-items: baseline;
   cursor: pointer;
+  user-select: none;
 }
 .folders-container > *{
   pointer-events: none;
@@ -88,7 +86,6 @@ div.obj-selected > div > button{
   border-radius: 0.1rem;
   cursor: pointer;
   display: flex;
-  align-items: center;
   justify-content: center;
 }
 
@@ -168,6 +165,7 @@ button[name="close-btn"]:hover{
   color: black;
   padding: 2rem;
   overflow-y: auto;
+  font-size: 1.5rem;;
 }
 .divider{
   background: #323232;
@@ -184,7 +182,7 @@ button[name="close-btn"]:hover{
 }
 .paper{
   min-height: 100vh;
-  background: repeating-linear-gradient(white 0px, white 48px, #00b0d7 50px);
+  background: repeating-linear-gradient(white 0px, white calc(var(--line-height) - 2px), #00b0d7 var(--line-height));
 }
 .left-ruler {
   margin-top: -5rem;
@@ -206,10 +204,10 @@ button[name="close-btn"]:hover{
   flex: 1;
   margin-left: 10px;
   margin-right: 20px;
-  min-height: 50px;
+  min-height: var(--line-height);
   font-size: 2.6rem;
   padding-top: 0px;
-  line-height: 50px;
+  line-height: var(--line-height);
   overflow-x: auto;
 }
 .cell-column img{
@@ -217,4 +215,54 @@ button[name="close-btn"]:hover{
 }
 .cell-column:focus{
   background-color: rgba(200, 200, 200, 0.2);
+}
+.text-format-btns{
+  position: fixed;
+  z-index: 21;
+  margin: -2rem;
+  width: calc(100% - var(--sidebar-width));
+}
+#format-btns{
+  background: rgb(45, 49, 57);
+  transition: 500ms;
+  height: 0px;
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+
+}
+#chevron-btn{
+  display: flex;
+  justify-content: center;
+}
+button[name="display-btns"]::after{
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  content:  "\f107";
+  font-size: 1.5rem;
+  color: white;
+  display: block;
+}
+button[name="display-btns"]{
+  background: rgb(45, 49, 57);
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+  border: none;
+}
+button.formatin{
+  margin-left: 0.2rem;
+  margin-right: 0.2rem;
+  width: 2rem;
+  height: 2rem;
+  overflow: hidden;
+}
+#highlighter{
+  width: 4rem;
+  height: 2rem;
+}
+button.btn-pointer:hover{
+  cursor: pointer;
+}
+.list-type{
+  margin-left: 2em;
 }

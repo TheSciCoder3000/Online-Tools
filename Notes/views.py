@@ -14,8 +14,9 @@ def home(request):
     return render(request, 'Notes/home.html', context=context)
 
 def update_notes(request):
+    print('\n\nUpdating notes\n\n')
     if request.is_ajax():
-        note = Notes.objects.get(name=request.POST['data_filename'])
+        note = Notes.objects.get(pk=request.POST['data_pk'])
         note.content = request.POST['my_data']
         note.save()
 
@@ -61,8 +62,9 @@ def update_folder_tree(request):
 
 def send_note_data(request):
     if request.is_ajax():
-        if request.GET['note_data']:
-            note = Notes.objects.get(name=request.GET['note_data'])
+        if request.GET['note_pk']:
+            print('\n\nSending Notes',request.GET['note_pk'],'\n\n')
+            note = Notes.objects.get(pk=request.GET['note_pk'])
             content = note.content
 
         return JsonResponse({
