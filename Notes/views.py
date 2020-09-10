@@ -2,16 +2,22 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from .models import Folders, Notes
 from .forms import FolderForm
-from django.views.decorators.csrf import csrf_protect
 
-def home(request):
+def dash(request):
+    context = {
+        'title': 'Dashboard'
+    }
+    return render(request, 'Notes/dashboard.html', context=context)
+
+def notes(request):
     form = FolderForm()
     context = {
+        'title': 'Notes',
         'Folders': Folders.objects.all(),
         'Notes': Notes.objects.all(),
         'FolderForm': form,
     }
-    return render(request, 'Notes/home.html', context=context)
+    return render(request, 'Notes/notes.html', context=context)
 
 def update_notes(request):
     print('\n\nUpdating notes\n\n')

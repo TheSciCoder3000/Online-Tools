@@ -1,0 +1,20 @@
+{% extends 'Notes/base.html' %}
+
+{% block navbar_html %}
+<nav id="upper-navbar">
+  <div id="navbar-item">
+    <h1>Dashboard</h1>
+    <div class="navbar-btns">
+      <a id="dash" class="active" href="#">Dashboard</a>
+      <a id="noting" href="{% url 'notes' %}">Notes</a>
+      <a id="dates" href="{% url 'schedule' %}">Schedules</a>
+    </div>
+  </div>
+</nav>
+{% endblock navbar_html %}
+
+{% block content %}
+<div class="content">
+  some text
+</div>
+{% endblock content %}

@@ -5,9 +5,14 @@ html, body{
   padding: 0px;
   overflow-x: hidden;
 }
+.m-0{
+  margin: 0;
+  padding: 0;
+  margin-left: -1em;
+}
 :root {
   --sidebar-width: 15%;
-  --line-height: 50px;
+  --line-height: 25px;
 }
 .horizontal{
   width: 1px;
@@ -35,6 +40,8 @@ html, body{
   height: 100%;
   font-size: 1.5rem;
   border-right: 5px solid #000000;
+  overflow-y: auto;
+  scrollbar-width: thin;
 }
 .sidebar > h2{
   text-align: center;
@@ -58,6 +65,7 @@ html, body{
 .label-container{
   pointer-events: none;
   display: flex;
+  text-align: left;
   z-index: 21;
 }
 .obj-selected > label{
@@ -113,9 +121,12 @@ div.obj-selected > div > button{
   position: fixed;
   z-index: 21;
   display: none;
+  left: 0;
+  top: 0;
 }
 #modal{
-  max-width: 60%;
+  min-width: 70vw;
+  min-height: 4em;
   background: white;
   padding: 1rem 1.5rem 1rem;
   top: 20%;
@@ -123,11 +134,14 @@ div.obj-selected > div > button{
   transform: translateX(-50%);
   position: fixed;
 }
+#modal-form{
+  display: flex;
+}
 #modal-text{
   font-size: 1.5rem;
 }
 input.modal-input{
-  width: 25rem;
+  width: 100%;
   height: 1.5rem;
 }
 button[name="close-btn"]::after{
@@ -174,27 +188,20 @@ button[name="close-btn"]:hover{
 /* || Notes Styles */
 .highlight-class{
   background: rgb(249, 165, 66);
+  opacity: 0.70;
+}
+.paper{
+  margin: 1em;
+  min-height: 100vh;
+  padding: 1em;
 }
 .info{
   background: white;
   padding-top: 5rem;
   position: relative;
 }
-.paper{
-  min-height: 100vh;
-  background: repeating-linear-gradient(white 0px, white calc(var(--line-height) - 2px), #00b0d7 var(--line-height));
-}
-.left-ruler {
-  margin-top: -5rem;
-  position: absolute;
-  left: 100px;
-  height: 100%;
-  width: 2px;
-  background: rgba(255,0,0,0.4);
-}
 .note-content{
-  margin-left: 100px;
-  padding-top: 61px;
+  padding-top: 1.17em;
 }
 .cell-row{
   flex: 1;
@@ -205,10 +212,11 @@ button[name="close-btn"]:hover{
   margin-left: 10px;
   margin-right: 20px;
   min-height: var(--line-height);
-  font-size: 2.6rem;
-  padding-top: 0px;
+  font-size: 0.9em;
+  padding-top: 0;
   line-height: var(--line-height);
   overflow-x: auto;
+  overflow-y: hidden;
 }
 .cell-column img{
   margin: 1rem;
@@ -252,7 +260,7 @@ button[name="display-btns"]{
 button.formatin{
   margin-left: 0.2rem;
   margin-right: 0.2rem;
-  width: 2rem;
+  min-width: 2rem;
   height: 2rem;
   overflow: hidden;
 }
@@ -263,6 +271,275 @@ button.formatin{
 button.btn-pointer:hover{
   cursor: pointer;
 }
+.check-container{
+  display: flex;
+  align-items: baseline;
+}
+
+/* || List Styles */
 .list-type{
   margin-left: 2em;
+  line-height: var(--line-height)
+}
+.desc-type{
+  list-style: none;
+  padding-left: 0.4em;
+  margin-left: 2.4em;
+  font-size: 0.85em;
+  position: relative;
+}
+.num-type{
+  list-style-type: decimal;
+}
+.desc-type::before{
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  font-size: 0.7em;
+  content:  "\f101";
+  margin-right: 0.5em;
+  height: auto;
+  position: absolute;
+  left: -1em;
+}
+
+
+/* || Navbar */
+#upper-navbar{
+  height: 3rem;
+  background: green;
+  padding: 2rem;
+}
+.left-navbar{
+  min-width: 0;
+  width: 0;
+  height: 100%;
+  position: fixed;
+  background: rgb(35, 36, 45);
+  z-index: 30;
+  color: white;
+  overflow: hidden;
+  transition: 500ms;
+}
+#upper-navbar h1{
+  margin-top: auto;
+}
+.left-navbar h1{
+  font-size: 2.5em;
+  padding: 0.5em;
+  text-align: center;
+}
+.nav-links a{
+  padding-left: 0.8em;
+  color: white;
+  text-decoration: none;
+}
+.nav-links li{
+  list-style: none;
+  margin: 4em 0 4em;
+}
+#noting::before{
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  content:  "\f518";
+  font-size: 2em;
+  padding-right: 0.2em;
+}
+#dates::before{
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  content:  "\f274";
+  font-size: 2em;
+  padding-right: 0.2em;
+}
+#dash::before{
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  content:  "\f0db";
+  font-size: 2em;
+  padding-right: 0.2em;
+}
+#navbar-item{
+  display: flex;
+  width: 70vw;
+  margin-left: auto;
+  margin-right: auto;
+}
+h1, h2{
+  margin: 0;
+  padding: 0;
+}
+.navbar-btns{
+  margin: auto;
+  margin-right: 0;
+}
+.navbar-btns a{
+  margin: 0 1em 0;
+  padding-left: 0.4em;
+  text-decoration: none;
+  color: black;
+}
+.nav-head, .sidebar-head{
+  display: flex;
+  padding: 0.5em;
+}
+button[name="close-nav"]::before{
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  content: "\f00d";
+  color: white;
+  font-size: 2em;
+}
+button[name="open-nav"]::before{
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  content: "\f0c9";
+  color: black;
+  font-size: 2em;
+}
+button.toggle-nav{
+  border: none;
+  background: none;
+  cursor: pointer;
+  margin-right: 1em;
+}
+
+
+/* || Dashboard */
+.content{
+  padding: 2rem;
+  height: 100%;
+}
+
+/* || Schedules Styles */
+.flex{
+  display: flex;
+}
+#sched-ctrls{
+  display: flex;
+}
+#calendar{
+  margin: 0.5em;
+  width: 50%;
+}
+.calendar-content{
+  box-shadow: 0 0 0.4em -2px black;
+  border-radius: 10px;
+}
+.calendar-header{
+  background: rgb(93, 236, 241);
+  padding: 1em;
+  text-align: center;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  position: relative;
+}
+.prev-btn:hover, .next-btn:hover{
+  cursor: pointer;
+  color: white;
+}
+.prev-btn::before{
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  content: "\f053";
+  position: absolute;
+  transform: translateY(-50%);
+  font-size: 2em;
+  left: 1em;
+  top: 50%;
+}
+.next-btn::before{
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  content: "\f054";
+  position: absolute;
+  transform: translateY(-50%);
+  font-size: 2em;
+  right: 1em;
+  top: 50%;
+}
+.calendar-view{
+  background: white;
+  padding: 0.5em;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+.date-row{
+  display: flex;
+  flex-wrap: wrap;
+}
+.date-row > div{
+  flex: 1;
+  text-align: center;
+  border: 1px solid rgb(226, 226, 226);
+}
+.cell-date{
+  position: relative;
+  padding-top: 14%;
+  user-select: none;
+}
+.cell-date::before{
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  content: "\f111";
+  float: left;
+  padding-bottom: 80%;
+  display: none;
+}
+.cell-date:hover{
+  background: rgb(217, 217, 217);
+  cursor: pointer;
+}
+.my-dates{
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+.curr-date{
+  background: rgb(0, 240, 255);
+}
+
+#details{
+  margin: 0.5em;
+  background: white;
+  width: 50%;
+  height: 100%;
+  max-height: 125vh;
+  border-radius: 10px;
+  box-shadow: 0 0 0.4em -2px black;
+  overflow-y: auto;
+}
+.detail-container > div{
+  margin: 2em 2em 4em;
+}
+.detail-header{
+  display: flex;
+}
+.detail-header > h2{
+  font-size: 2.2em;
+}
+button[name="update"]{
+  padding: 0.5em 1em 0.5em;
+  background: rgb(89, 255, 0);
+  margin-left: auto;
+  border: none;
+  border-radius: 8px;
+}
+button[name="update"]:hover{
+  cursor: pointer;
+}
+.task-item-list{
+  list-style: none;
+  font-size: 1.2em;
+  margin-bottom: 1em;
+}
+.item-complete{
+  text-decoration: line-through;
+  color: rgb(106, 106, 106);
+}
+.sub-detail-container{
+  display: block;
+  background: rgb(245, 245, 245);
+  height: 500px;
+  padding: 0.5em;;
 }

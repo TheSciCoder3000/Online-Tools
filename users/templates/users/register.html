@@ -1,0 +1,22 @@
+{% extends 'Notes/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block navbar_html %}
+{% endblock navbar_html %}
+
+{% block content %}
+<div id="register-body">
+  <form class="user-container" method="post">{% csrf_token %}
+    <div>
+      {{ form|crispy }}
+    </div>
+    <div>
+      <button type="submit">Sign Up</button>
+    </div>
+  </form>
+</div>
+{% endblock content %}
+
+{% block add_style %}
+<link rel="stylesheet" href="{% static 'css/user_styles.css' %}">
+{% endblock add_style %}

@@ -38,7 +38,7 @@ window.onkeydown = function(e){
   if (e.which == 65) {//Add File
     var folder = document.activeElement.parentNode.parentNode;
     var child_container = folder.querySelector('div');
-    if (child_container.classList.toString() == "child-container") {
+    if (child_container.classList.contains("child-container")) {
       e.preventDefault();
       window.selector = folder
       document.querySelector('#modal-container').style.display = "block";

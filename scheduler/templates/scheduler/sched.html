@@ -1,0 +1,214 @@
+{% extends 'Notes/base.html' %}
+
+{% block navbar_html %}
+<nav id="upper-navbar">
+  <div id="navbar-item">
+    <h1>Calendar</h1>
+    <div class="navbar-btns">
+      <a id="dash" class="active" href="#">Dashboard</a>
+      <a id="noting" href="{% url 'notes' %}">Notes</a>
+      <a id="dates" href="{% url 'schedule' %}">Schedules</a>
+    </div>
+  </div>
+</nav>
+{% endblock navbar_html %}
+
+{% block content %}
+<div class="content">
+  <div id="modal-container">
+    <div class="overlay"></div>
+  </div>
+
+  <div id="sched-ctrls">
+    <button type="button" name="button">test</button>
+    <button type="button" name="button">test</button>
+    <button type="button" name="button">test</button>
+    <button type="button" name="button">test</button>
+  </div>
+  <div id="sched-content" class="flex">
+    <div id="calendar">
+      <div class="calendar-content">
+        <div class="calendar-header">
+          <h1 id="month-header">September</h1>
+          <h4 id="year-header">2020</h4>
+          <div class="calendar-btns">
+            <a onclick="prevCalendar()" class="prev-btn"></a>
+            <a onclick="nextCalendar()" class="next-btn"></a>
+          </div>
+        </div>
+        <div class="calendar-view">
+          <div class="date-row">
+            <div>SUN</div>
+            <div>MON</div>
+            <div>TUES</div>
+            <div>WED</div>
+            <div>THURS</div>
+            <div>FRI</div>
+            <div>SAT</div>
+          </div>
+          <div class="calendar-body">
+
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="details">
+      {% include 'scheduler/date_detail_template.html' with test="folder" %}
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block extra_script %}
+<script>
+  var months = ["January", "Febuary", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"]
+
+  function nextCalendar() {
+    let curr_month = document.getElementById("month-header")
+    let curr_year = document.getElementById("year-header")
+
+    if (curr_month.innerText == "December") {
+      curr_year.innerText = parseInt(curr_year.innerText)+1
+      curr_month.innerText = months[0]
+      updateCalendar(0, parseInt(curr_year.innerText))
+    }else {
+      curr_month.innerText = months[months.indexOf(curr_month.innerText)+1]
+      updateCalendar(months.indexOf(curr_month.innerText), parseInt(curr_year.innerText))
+    }
+  }
+
+  function prevCalendar() {
+    let curr_month = document.getElementById("month-header")
+    let curr_year = document.getElementById("year-header")
+
+    if (curr_month.innerText == "January") {
+      curr_year.innerText = parseInt(curr_year.innerText)-1
+      curr_month.innerText = months[11]
+      updateCalendar(11, parseInt(curr_year.innerText))
+    }else {
+      curr_month.innerText = months[months.indexOf(curr_month.innerText)-1]
+      updateCalendar(months.indexOf(curr_month.innerText), parseInt(curr_year.innerText))
+    }
+  }
+
+  function updateCalendar(month, year){
+    let daysofMonth = new Date(year, month, 0).getDate();
+    let date = new Date(year, month, 1);
+    let calendar_body = document.querySelector(".calendar-body")
+    calendar_body.innerHTML = ""
+
+    while(month == date.getMonth()){
+      var row = document.createElement("DIV")
+      row.setAttribute("class", "date-row")
+      for(let j = 0; j < 7; j++){
+        if(j == date.getDay() && month == date.getMonth()){
+          let curr_date = new Date()
+          let cell = document.createElement("DIV")
+          let cell_container = document.createElement("DIV")
+          cell.setAttribute("class", "cell-date")
+          if (date.getDate() == curr_date.getDate() && date.getMonth() == curr_date.getMonth() && date.getYear() == curr_date.getYear()) {
+            cell.classList.add("curr-date");
+          }
+          cell_container.setAttribute("class", "my-dates")
+          cell_container.innerText = date.getDate()
+          cell.addEventListener("dblclick", function(){
+            getTask(new Date(year, month, cell_container.innerText))
+          })
+          //cell.setAttribute("ondbclick", `getTask(new Date(${year},${month},${cell_container.innerText}))`)
+          cell.appendChild(cell_container)
+
+          date.setDate(date.getDate() + 1);
+          row.appendChild(cell)
+        }else{
+          let cell = document.createElement("DIV")
+          row.appendChild(cell)
+        }
+      }
+      calendar_body.appendChild(row)
+    }
+  }
+  function updateDetails(detail_date) {
+    let detail_cont = document.querySelector(".detail-container")
+  }
+
+  var curr_date = new Date()
+  updateCalendar(curr_date.getMonth(), curr_date.getFullYear())
+</script>
+<script>
+  function updateTaskList(e){
+    let checkbox = e.target
+    let text_span = checkbox.parentNode.querySelector(".text")
+    if (checkbox.checked) {
+      text_span.classList.add("item-complete")
+    } else if (text_span.classList.contains("item-complete")) {
+      text_span.classList.remove("item-complete")
+    }
+  }
+
+  function showTaskList(task_dict){
+    let task_container = document.querySelector(".sub-detail-container > ul")
+    task_container.innerHTML = ""
+    for (var task_name in task_dict) {
+      if (task_dict.hasOwnProperty(task_name)) {
+        let li = document.createElement("LI")
+        li.setAttribute("class", "task-item-list")
+
+        let task_input = document.createElement("INPUT")
+        task_input.setAttribute("class", "check-task-list")
+        task_input.setAttribute("onclick", "updateTaskList(event)")
+        task_input.setAttribute("type", "checkbox")
+        task_input.checked = task_dict[task_name]
+
+        let task_span = document.createElement("SPAN")
+        task_span.setAttribute("class", "text")
+        task_span.innerText = task_name
+
+        li.appendChild(task_input)
+        li.appendChild(task_span)
+
+        task_container.appendChild(li)
+      }
+    }
+  }
+
+  function ajaxTask(){
+    /*$.ajax({
+      type: "POST",
+      url: ,
+      data:{
+        csrfmiddlewaretoken: '{{csrf_token}}',
+        my_lists: ,
+      },
+      dataType: 'json',
+      success: function (data){
+        if (data.msg == 'success'){
+          console.log("success");
+          document.querySelector('.changes-button').style.display = "none";
+          note_content = document.querySelector('.note-content').innerHTML
+        }
+      }
+    })*/
+  }
+
+  function getTask(tasks_date){
+    $.ajax({
+      type: "POST",
+      url: '{% url "get-task" %}',
+      data:{
+        csrfmiddlewaretoken: '{{csrf_token}}',
+        tasks_day: tasks_date.getDate(),
+        tasks_month: tasks_date.getMonth() + 1,
+        tasks_year: tasks_date.getFullYear()
+      },
+      dataType: 'json',
+      success: function (data){
+        if (data.msg == 'success') {
+          showTaskList(data.tasks)
+        }
+      }
+    })
+  }
+  getTask(curr_date)
+</script>
+{% endblock extra_script %}

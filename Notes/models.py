@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 class Tags(models.Model):
     name = models.CharField(max_length=25, null=True)
@@ -12,6 +13,7 @@ class Tags(models.Model):
 class Folders(models.Model):
     root = models.ForeignKey('self', on_delete=models.CASCADE, null=True,
                              blank=True, default='root')
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     name = models.CharField(max_length=100, null=True, default='New Folder')
     details = models.TextField(null=True, blank=True)
     tags = models.ManyToManyField(Tags, blank=True)
