@@ -182,7 +182,7 @@
   function add_row(){
     var active_elem = document.activeElement
     if (active_elem.classList.toString() == "cell-column"){
-      var new_row = `<div class="cell-row"><div class="cell-column" contenteditable spellcheck="false"></div></div>`
+      var new_row = `<div class="cell-row"><div class="cell-column" contenteditable></div></div>`
       $(new_row).insertAfter(active_elem.parentNode);
       active_elem.parentNode.nextSibling.childNodes[0].focus();
     }
@@ -398,6 +398,7 @@
         update_session_style()
       }
       else {
+        console.log("openning");
         if (e.target.checked) {
           e.target.checked = false;
         }else {

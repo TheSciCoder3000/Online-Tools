@@ -17,6 +17,21 @@
 <div class="content">
   <div id="modal-container">
     <div class="overlay"></div>
+    <div class="modal-task-container">
+      <form id="task-form">{% csrf_token %}
+        <button onclick="close_modal()" type="button" name="close-btn"></button>
+        <fieldset>
+          <label for="">Task Name</label>
+          <input id="task-name" type="text" required placeholder="Put task name here">
+
+          <label>Task Details</label>
+          <textarea id="task-details" rows="8" cols="80"></textarea>
+
+          <input id="task-date" type="hidden" required value="">
+        </fieldset>
+        <button type="submit" name="button">Create</button>
+      </form>
+    </div>
   </div>
 
   <div id="sched-ctrls">
@@ -114,6 +129,8 @@
           cell_container.innerText = date.getDate()
           cell.addEventListener("dblclick", function(){
             getTask(new Date(year, month, cell_container.innerText))
+            getDaySchedule(new Date(year, month, cell_container.innerText).getDay())
+
           })
           //cell.setAttribute("ondbclick", `getTask(new Date(${year},${month},${cell_container.innerText}))`)
           cell.appendChild(cell_container)
@@ -136,6 +153,79 @@
   updateCalendar(curr_date.getMonth(), curr_date.getFullYear())
 </script>
 <script>
+  $(document).on('submit', '#task-form', function(e){
+    e.preventDefault();
+
+    $.ajax({
+      type: 'POST',
+      url: '{% url "create-task" %}',
+      data:{
+        csrfmiddlewaretoken: '{{ csrf_token }}',
+        taskName: $('#task-name').val(),
+        taskDetail: $('#task-details').val(),
+        taskDate: $('#task-date').val()
+      },
+      success: function(data){
+        if (data.msg == "success") {
+          document.getElementById("modal-container").style.display = "none";
+          let re_year, re_month, re_day
+          [re_year, re_month, re_day] = document.querySelector(".sub-detail-container").getAttribute("date").split('-')
+          var refresh_date = new Date(parseInt(re_year), parseInt(re_month-1), parseInt(re_day))
+          getTask(refresh_date)
+        }
+      }
+    })
+  })
+
+  function createTaskDict(must_list=false){
+    let document_tasks = document.querySelectorAll(".task-item-list")
+    let temp_dict = {}
+    let temp_list = []
+    for (var i = 0; i < document_tasks.length; i++) {
+      let task_name = document_tasks[i].querySelector(".text").innerText
+      let task_checked = document_tasks[i].querySelector("input").checked
+      temp_dict[task_name] = task_checked
+      temp_list.push([task_name, task_checked])
+    }
+    if (must_list) {
+      return temp_list;
+    }else {
+      return temp_dict
+    }
+  }
+
+  function evalTasks(){
+    let curr_tasks = createTaskDict()
+
+    document.getElementById("task-update").style.display = "none";
+    for (var key in curr_tasks) {
+      if (window.myTasks.hasOwnProperty(key)) {
+        if (curr_tasks[key] != window.myTasks[key]) {
+          document.getElementById("task-update").style.display = "block";
+        }
+      }else {
+        document.getElementById("task-update").style.display = "block";
+      }
+    }
+  }
+
+  function updateServerTask(){
+    $.ajax({
+      type: "POST",
+      url: '{% url "update-task" %}',
+      data: {
+        csrfmiddlewaretoken: '{{csrf_token}}',
+        newtaskList: JSON.stringify(createTaskDict())
+      },
+      dataType: 'json',
+      success: function (data){
+        if (data.msg == 'success') {
+          document.getElementById("task-update").style.display = "none";
+        }
+      }
+    })
+  }
+
   function updateTaskList(e){
     let checkbox = e.target
     let text_span = checkbox.parentNode.querySelector(".text")
@@ -144,6 +234,7 @@
     } else if (text_span.classList.contains("item-complete")) {
       text_span.classList.remove("item-complete")
     }
+    evalTasks()
   }
 
   function showTaskList(task_dict){
@@ -158,37 +249,63 @@
         task_input.setAttribute("class", "check-task-list")
         task_input.setAttribute("onclick", "updateTaskList(event)")
         task_input.setAttribute("type", "checkbox")
-        task_input.checked = task_dict[task_name]
 
         let task_span = document.createElement("SPAN")
         task_span.setAttribute("class", "text")
         task_span.innerText = task_name
 
+        let list_remove_btn = document.createElement("BUTTON")
+        list_remove_btn.setAttribute("class", "remove-task-btn")
+        list_remove_btn.setAttribute("onclick", "removeList(event)")
+        list_remove_btn.innerText = "-"
+
+        if (task_dict[task_name]){
+          task_input.checked = task_dict[task_name]
+          task_span.classList.add("item-complete")
+        }
+
         li.appendChild(task_input)
         li.appendChild(task_span)
+        li.appendChild(list_remove_btn)
 
         task_container.appendChild(li)
       }
     }
   }
 
-  function ajaxTask(){
-    /*$.ajax({
-      type: "POST",
-      url: ,
-      data:{
-        csrfmiddlewaretoken: '{{csrf_token}}',
-        my_lists: ,
-      },
-      dataType: 'json',
-      success: function (data){
-        if (data.msg == 'success'){
-          console.log("success");
-          document.querySelector('.changes-button').style.display = "none";
-          note_content = document.querySelector('.note-content').innerHTML
+  function removeList(e){
+    if (confirm("Are you sure you want to delete the task?")) {
+      let task_name = e.target.parentNode.querySelector(".text").innerText
+      let task_date = e.target.parentNode.parentNode.parentNode.getAttribute("date")
+      $.ajax({
+        type: "post",
+        url: "{% url 'remove-task' %}",
+        data:{
+          csrfmiddlewaretoken: '{{ csrf_token }}',
+          taskName: task_name,
+          taskDate: task_date
+        },
+        dataType: 'json',
+        success: function(data) {
+          if (data.msg == 'success') {
+            let re_year, re_month, re_day
+            [re_year, re_month, re_day] = document.querySelector(".sub-detail-container").getAttribute("date").split('-')
+            var refresh_date = new Date(parseInt(re_year), parseInt(re_month-1), parseInt(re_day))
+            getTask(refresh_date)
+          }
         }
-      }
-    })*/
+      })
+    }
+  }
+
+  function pad(num, size) {
+    var s = num+"";
+    while (s.length < size) s = "0" + s;
+    return s;
+  }
+
+  function close_modal(){
+    document.querySelector("#modal-container").style.display = "none";
   }
 
   function getTask(tasks_date){
@@ -204,11 +321,63 @@
       dataType: 'json',
       success: function (data){
         if (data.msg == 'success') {
+          window.myTasks = data.tasks
           showTaskList(data.tasks)
+          let month = pad(tasks_date.getMonth() + 1, 2)
+          let day = pad(tasks_date.getDate(), 2)
+
+          document.querySelector(".sub-detail-container").setAttribute("date", `${tasks_date.getFullYear()}-${month}-${day}`)
+          document.querySelector("#header-container > h1").innerText = `${tasks_date.getFullYear()}-${month}-${day}`
         }
       }
     })
   }
   getTask(curr_date)
+
+
+  function add_task_modal(){
+    document.getElementById("modal-container").style.display = "block";
+    document.getElementById("task-date").value = document.querySelector(".sub-detail-container").getAttribute("date")
+  }
+</script>
+
+<!-- Schedule logic -->
+<script>
+  function getDaySchedule(weekday){
+    let weekday_list = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday',
+                        'Friday', 'Saturday']
+    $.ajax({
+      type: "post",
+      url: "{% url 'get-sched' %}",
+      data:{
+        csrfmiddlewaretoken: "{{ csrf_token }}",
+        'weekday': weekday_list[weekday]
+      },
+      dataType: "json",
+      success: function(data){
+        if (data.msg == 'success') {
+          let day_subjects = data.subjects
+          document.querySelector(".body-sched").innerHTML = ""
+
+          for (let subj in day_subjects) {
+            let row = document.createElement("TR")
+            let time_d = document.createElement("TD")
+            let subj_d = document.createElement("TD")
+
+            time_d.setAttribute("class", "time-col")
+            time_d.innerText = day_subjects[subj][0]+':'+day_subjects[subj][1]+' '+day_subjects[subj][2]
+            row.appendChild(time_d)
+            subj_d.setAttribute("class", "subj-col")
+            subj_d.innerText = subj
+            row.appendChild(subj_d)
+
+            document.querySelector(".body-sched").appendChild(row)
+          }
+        }
+      }
+    });
+  }
+
+  getDaySchedule(curr_date.getDay())
 </script>
 {% endblock extra_script %}

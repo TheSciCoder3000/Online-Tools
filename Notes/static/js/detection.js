@@ -20,7 +20,7 @@ function replace_template(id_num, key){
       break;
     case 'description':
       return `
-        <li id="list-${id_num}" class="list-type desc-type">description</li>
+        <li id="list-${id_num}" class="list-type desc-type">.</li>
       `
       break;
     case 'checkbox':
@@ -73,13 +73,13 @@ function try_nest_and_fail(keyword, template_tag){
 $(document).on('keydown', '.cell-column', function (e){
   if (match(e.target.innerText, keywords_config).key){
     var keyW = match(e.target.innerText, keywords_config)
-    var idN = document.querySelectorAll('.list-type').length
-    if (try_nest_and_fail(keyW.key, replace_template(idN+1,keyW.value))){
+    var idN = document.querySelectorAll('li').length*parseInt(Math.random()*100)
+    if (try_nest_and_fail(keyW.key, replace_template(idN,keyW.value))){
       console.log('not nested');
-      e.target.innerHTML = e.target.innerHTML.replace(keyW.key, replace_template(idN+1,keyW.value))
+      e.target.innerHTML = e.target.innerHTML.replace(keyW.key, replace_template(idN,keyW.value))
     }
 
-    var list_target = document.querySelector('#list-'+(idN+1))
+    var list_target = document.querySelector('#list-'+(idN))
     console.log(e.target.innerHTML);
     setCaret(list_target)
     e.preventDefault();

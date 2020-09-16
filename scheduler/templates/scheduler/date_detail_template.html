@@ -1,8 +1,12 @@
 <div class="detail-container">
+  <div id="header-container">
+    <h1></h1>
+  </div>
   <div class="task-container">
     <div class="detail-header">
       <h2>Tasks</h2>
-      <button onclick="ajaxTask()" type="button" name="update">Update</button>
+      <button onclick="add_task_modal()" type="button" class="add-task">+</button>
+      <button id="task-update" onclick="updateServerTask()" type="button" name="update">Update</button>
     </div>
     <hr>
     <div class="sub-detail-container">
@@ -24,7 +28,17 @@
     </div>
     <hr>
     <div class="sub-detail-container">
+      <table class="sched-table">
+        <thead>
+          <tr>
+            <th>Time:</th>
+            <th>Subjects</th>
+          </tr>
+        </thead>
+        <tbody class="body-sched">
 
+        </tbody>
+      </table>
     </div>
   </div>
 </div>
