@@ -1,6 +1,5 @@
 window.onkeydown = function(e){
   if (e.which == 17){
-    e.preventDefault();
     window.ctrl_pressed = true;
   }
   if (e.ctrlKey && e.which == 66){// Bold HK
@@ -36,50 +35,74 @@ window.onkeydown = function(e){
     add_column();
   }
   if (e.which == 65) {//Add File
-    var folder = document.activeElement.parentNode.parentNode;
-    var child_container = folder.querySelector('div');
-    if (child_container.classList.contains("child-container")) {
-      e.preventDefault();
-      window.selector = folder
-      document.querySelector('#modal-container').style.display = "block";
-      document.querySelector('#modal-text').innerHTML = "Put the name of your file down below";
-      document.querySelector('#folder-root').value = folder.getAttribute('foldername');
-      document.querySelector('#modal-form-btn').setAttribute('rootFolder', get_root_folder(folder))
-      document.querySelector('#modal-form-btn').setAttribute('Foldername', folder.getAttribute('foldername'))
-      document.querySelector('#modal-form-btn').setAttribute('create', 'File')
+    let selected_objs = document.querySelectorAll('.obj-selected')
+    let active_forms = document.querySelectorAll('.active-form')
+    for (var i = 0; i < active_forms.length; i++) {
+      active_forms[i].classList.remove("active-form")
+      active_forms[i].style.display = 'none';
+    }
+    for (var i = 0; i < selected_objs.length; i++) {
+      if (selected_objs[i].getAttribute("type") == "Folder"){
+        console.log(selected_objs[i]);
+        document.querySelector("#modal-container").style.display = "block"
+        document.querySelector("#modal-text").innerText = "new Note"
+        document.getElementById("File_name").classList.add("active-form")
+        document.getElementById("File_name").style.display = "block";
+        document.querySelector("#modal-form-btn").setAttribute("rootFolder", selected_objs[i].getAttribute("id"))
+        document.querySelector("#modal-form-btn").setAttribute("obj-type", 'File')
+      }
     }
   }
   if (e.shiftKey && e.which == 65) {//Add Folder
-    var folder = document.activeElement.parentNode.parentNode;
-    var child_container = folder.querySelector('div');
-    if (child_container.classList.toString() == "child-container") {
-      e.preventDefault();
-      window.selector = folder
-      document.querySelector('#modal-container').style.display = "block";
-      document.querySelector('#modal-text').innerHTML = "Put the name of your folder down below";
-      document.querySelector('#folder-root').value = folder.getAttribute('foldername');
-      document.querySelector('#modal-form-btn').setAttribute('rootFolder', get_root_folder(folder))
-      document.querySelector('#modal-form-btn').setAttribute('Foldername', folder.getAttribute('foldername'))
-      document.querySelector('#modal-form-btn').setAttribute('create', 'Folder')
+    let selected_objs = document.querySelectorAll('.obj-selected')
+    let active_forms = document.querySelectorAll('.active-form')
+    for (var i = 0; i < active_forms.length; i++) {
+      active_forms[i].classList.remove("active-form")
+      active_forms[i].style.display = 'none';
+    }
+    for (var i = 0; i < selected_objs.length; i++) {
+      if (selected_objs[i].getAttribute("type") == "Folder"){
+        console.log(selected_objs[i]);
+        document.querySelector("#modal-container").style.display = "block"
+        document.querySelector("#modal-text").innerText = "new Folder"
+        document.getElementById("Folder_name").classList.add("active-form")
+        document.getElementById("Folder_name").style.display = "block";
+        document.querySelector("#modal-form-btn").setAttribute("rootFolder", selected_objs[i].getAttribute("id"))
+        document.querySelector("#modal-form-btn").setAttribute("obj-type", 'Folder')
+      }
     }
   }
-  if (e.which == 46){//Delete Folder
+  if (e.which == 46){//Delete Folder and Note
     var objects = document.querySelectorAll('.obj-selected');
     for (var i = 0; i < objects.length; i++) {
-      var object = objects[i]
-      var root_obj = object.parentNode.parentNode
-      window.selector = root_obj
-      function get_objName(obj) {
-        if (obj.getAttribute('Foldername')){
-          return obj.getAttribute('Foldername')
-        } else{
-          return obj.getAttribute('Filename')
+      let obj_type = objects[i].getAttribute("type")
+      if (confirm(`Are you sure you want to delete this ${obj_type}`)) {
+        let obj_name, root_id
+        if (obj_type == "Folder") {
+          obj_name = objects[i].getAttribute("foldername")
+          root_id = objects[i].parentNode.parentNode.getAttribute("id")
+          let obj_id = objects[i].getAttribute("id")
+          if (sessionStorage.getItem("Openned Folders")){
+            let opennedF = sessionStorage.getItem("Openned Folders").split(",")
+            if (opennedF.includes(obj_id)) {
+              let obj_index = opennedF.indexOf(obj_id);
+              if (obj_index > -1) {
+                opennedF.splice(obj_index, 1);
+                sessionStorage.setItem("Openned Folders", opennedF)
+              }
+            }
+          }
+        } else {
+          obj_name = objects[i].getAttribute("filename")
+          root_id = objects[i].parentNode.parentNode.getAttribute("id")
         }
+        if (objects[i].parentNode.getAttribute("id") == "rootF") {
+          root_id = "root"
+        }
+
+        delete_obj(obj_type, root_id, obj_name)
+
       }
-      delete_obj(object.getAttribute('type'),
-                 root_obj.parentNode.parentNode.getAttribute('Foldername'),
-                 root_obj.getAttribute('Foldername'),
-                 get_objName(object));
     }
 
     }

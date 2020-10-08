@@ -5,9 +5,9 @@
   <div id="navbar-item">
     <h1>Calendar</h1>
     <div class="navbar-btns">
-      <a id="dash" class="active" href="#">Dashboard</a>
-      <a id="noting" href="{% url 'notes' %}">Notes</a>
-      <a id="dates" href="{% url 'schedule' %}">Schedules</a>
+      <a class="link-list" id="dash" href="{% url 'dashboard' %}">Dashboard</a>
+      <a class="link-list" id="noting" href="{% url 'notes' %}">Notes</a>
+      <a class="link-list" id="dates" class="active" href="{% url 'schedule' %}">Schedules</a>
     </div>
   </div>
 </nav>
@@ -128,9 +128,9 @@
           cell_container.setAttribute("class", "my-dates")
           cell_container.innerText = date.getDate()
           cell.addEventListener("dblclick", function(){
+            document.querySelector("select[name='display-sub']").value = "0"
             getTask(new Date(year, month, cell_container.innerText))
             getDaySchedule(new Date(year, month, cell_container.innerText).getDay())
-
           })
           //cell.setAttribute("ondbclick", `getTask(new Date(${year},${month},${cell_container.innerText}))`)
           cell.appendChild(cell_container)
@@ -145,11 +145,9 @@
       calendar_body.appendChild(row)
     }
   }
-  function updateDetails(detail_date) {
-    let detail_cont = document.querySelector(".detail-container")
-  }
 
   var curr_date = new Date()
+  document.getElementById("month-header").innerText = months[curr_date.getMonth()]
   updateCalendar(curr_date.getMonth(), curr_date.getFullYear())
 </script>
 <script>
@@ -184,7 +182,15 @@
     for (var i = 0; i < document_tasks.length; i++) {
       let task_name = document_tasks[i].querySelector(".text").innerText
       let task_checked = document_tasks[i].querySelector("input").checked
-      temp_dict[task_name] = task_checked
+      let task_date
+      if (document.querySelector("select[name='display-sub']").value == "1") {
+        let [temp_month, temp_day, temp_year] = document_tasks[i].querySelector(".date-span").getAttribute("date").split("/")
+        task_date = `${temp_year}-${temp_month}-${temp_day}`
+        console.log(task_date);
+      }else {
+        task_date = document.querySelector("#header-container").innerText
+      }
+      temp_dict[task_name] = [task_checked, task_date]
       temp_list.push([task_name, task_checked])
     }
     if (must_list) {
@@ -259,13 +265,22 @@
         list_remove_btn.setAttribute("onclick", "removeList(event)")
         list_remove_btn.innerText = "-"
 
-        if (task_dict[task_name]){
+        if (task_dict[task_name] == true){
           task_input.checked = task_dict[task_name]
           task_span.classList.add("item-complete")
         }
 
         li.appendChild(task_input)
         li.appendChild(task_span)
+        if (document.querySelector("select[name='display-sub']").value == "1") {
+          let date_span = document.createElement("SPAN")
+          date_span.setAttribute("class", "date-span")
+          date_span.setAttribute("date", task_dict[task_name])
+          let [month, day, year] = task_dict[task_name].split("/")
+          let date_instance = new Date(year, month-1, day)
+          date_span.innerText = `(${Math.round((date_instance-curr_date)/(1000*60*60*24))} days left)`
+          li.appendChild(date_span)
+        }
         li.appendChild(list_remove_btn)
 
         task_container.appendChild(li)
@@ -276,7 +291,14 @@
   function removeList(e){
     if (confirm("Are you sure you want to delete the task?")) {
       let task_name = e.target.parentNode.querySelector(".text").innerText
-      let task_date = e.target.parentNode.parentNode.parentNode.getAttribute("date")
+      let task_date
+      if (document.querySelector("select[name='display-sub']").value == "1") {
+        let [temp_day, temp_month, temp_year] = e.target.parentNode.querySelector("span.date-span").getAttribute('date').split("/")
+        task_date = `${temp_year}-${pad(temp_day, 2)}-${pad(temp_month, 2)}`
+      }else {
+        task_date = e.target.parentNode.parentNode.parentNode.getAttribute("date")
+        console.log(task_date);
+      }
       $.ajax({
         type: "post",
         url: "{% url 'remove-task' %}",
@@ -309,6 +331,7 @@
   }
 
   function getTask(tasks_date){
+    let sub_view = document.querySelector('select[name="display-sub"]').value
     $.ajax({
       type: "POST",
       url: '{% url "get-task" %}',
@@ -316,7 +339,8 @@
         csrfmiddlewaretoken: '{{csrf_token}}',
         tasks_day: tasks_date.getDate(),
         tasks_month: tasks_date.getMonth() + 1,
-        tasks_year: tasks_date.getFullYear()
+        tasks_year: tasks_date.getFullYear(),
+        task_view: sub_view
       },
       dataType: 'json',
       success: function (data){
@@ -338,6 +362,11 @@
   function add_task_modal(){
     document.getElementById("modal-container").style.display = "block";
     document.getElementById("task-date").value = document.querySelector(".sub-detail-container").getAttribute("date")
+  }
+
+  function sub_view_change(){
+    let [year, month, day] = document.getElementById("header-container").innerText.split("-")
+    getTask(new Date(year, month-1, day))
   }
 </script>
 
@@ -367,8 +396,11 @@
             time_d.setAttribute("class", "time-col")
             time_d.innerText = day_subjects[subj][0]+':'+day_subjects[subj][1]+' '+day_subjects[subj][2]
             row.appendChild(time_d)
+
             subj_d.setAttribute("class", "subj-col")
             subj_d.innerText = subj
+
+            row.setAttribute("class", "sched-row")
             row.appendChild(subj_d)
 
             document.querySelector(".body-sched").appendChild(row)

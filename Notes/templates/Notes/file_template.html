@@ -1,7 +1,7 @@
 
 <div type="File" class="folder-tree-container" filePK="{{ File.pk }}" Filename="{{ File.name }}">
   <div>
-    <button class="file-container" onclick="selectObject(event.target.parentNode.parentNode)" ondblclick="get_file('{{ File.name }}', '{{File.pk}}')">
+    <button class="full-width-btn" onclick="selectObject(event.target.parentNode.parentNode)" ondblclick="get_file('{{ File.name }}', '{{File.pk}}')">
       <div class="label-container">
         <div class="file-icon"></div>
         <span>{{ File.name }}</span>

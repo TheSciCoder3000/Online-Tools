@@ -24,10 +24,10 @@
     <div id="modal">
       <button type="button" name="close-btn" onclick="close_modal()"></button>
       <div id="modal-text">content</div>
-      <form id="modal-form" action="{% url 'update-folders' %}" method="post">{% csrf_token %}
+      <form id="modal-form" action="{% url 'update-folders' %}" method="post">
         {{ FolderForm.name }}
-        <input id="folder-root" type="text" value="">
-        <button id="modal-form-btn" rootFolder="" type="button" onclick="add_obj(event)">OK</button>
+        {{ NoteForm.name }}
+        <button id="modal-form-btn" rootFolder="" type="submit">OK</button>
       </form>
     </div>
   </div>
@@ -37,11 +37,12 @@
         <button class="toggle-nav" onclick="open_nav()" type="button" name="open-nav"></button>
         <h2>Notes</h2>
       </div>
-      <div>
+      <div id="rootF">
         {% for folder in Folders|get_root_folders %}
           {% include 'Notes/folder_template.html' with Folder=folder %}
         {% endfor %}
       </div>
+      <button id="add-root" onclick="add_root_folder()" class="full-width-btn" type="button">Add Root Folder</button>
     </div>
 
     <div class="main-content">
@@ -54,6 +55,7 @@
           <button class="formatin btn-pointer" onclick="super_sub('super')">Super</button>
           <button class="formatin btn-pointer" onclick="highlight_text()">H</button>
           <input id="highlighter" type="color" name="" value="#ecf041">
+          <button class="formatin btn-pointer" onclick="toggle_spellcheck()">spellcheck</button>
         </div>
         <div id="chevron-btn">
           <button class="btn-pointer" onclick="toggle_fomat()" name="display-btns"></button>
@@ -70,7 +72,7 @@
       <div class="info">
         <div class="paper">
           <div class="left-ruler"></div>
-          <div class="note-content" filename="">
+          <div class="note-content" spellcheck="false" filename="">
           </div>
         </div>
       </div>
@@ -81,6 +83,7 @@
 
 {% block extra_script %}
 <!-- Logic Script -->
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
 <script src="{% static 'js/shortcuts.js' %}"></script>
 <script src="{% static 'js/detection.js' %}"></script>
 <script>
@@ -88,7 +91,6 @@
    var note_content = '';
 
   $('.note-content').bind('DOMSubtreeModified', function(){
-    resize_img()
     if (window.check_content) {
       if (note_content == document.querySelector('.note-content').innerHTML) {
         document.querySelector('.changes-button').style.display = "none";
@@ -120,7 +122,6 @@
       dataType: 'json',
       success: function (data){
         if (data.msg == 'success'){
-          console.log("success");
           document.querySelector('.changes-button').style.display = "none";
           note_content = document.querySelector('.note-content').innerHTML
         }
@@ -152,7 +153,6 @@
     span.style.background = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.50)`;
     span.setAttribute("class", "highlight-span")
     span.textContent = text;
-    console.log(span.innerHTML);
 
     var range = document.getSelection().getRangeAt(0);
     range.deleteContents();
@@ -171,7 +171,6 @@
 
 
     tag.textContent = text;
-    console.log(tag.innerHTML);
 
     var range = document.getSelection().getRangeAt(0);
     range.deleteContents();
@@ -208,7 +207,6 @@
 
   //File and Folder Manipulation
   function add_file(folder){
-    console.log(folder.getAttribute("foldername"));
     $.ajax({
         url: "{% url 'update-folders' %}",
         type: 'POST',
@@ -218,9 +216,34 @@
         },
         dataType: 'json',
         success: function(response) {
-          console.log(response.msg);
         }
     });
+  }
+  function add_folder(){
+    let selected_objs = document.querySelectorAll('.obj-selected')
+    let active_forms = document.querySelectorAll('.active-form')
+    for (var i = 0; i < active_forms.length; i++) {
+      active_forms[i].classList.remove("active-form")
+      active_forms[i].style.display = 'none';
+    }
+    for (var i = 0; i < selected_objs.length; i++) {
+      if (selected_objs[i].getAttribute("type") == "Folder"){
+        document.querySelector("#modal-container").style.display = "block"
+        document.querySelector("#modal-text").innerText = "new Folder"
+        document.getElementById("Folder_name").classList.add("active-form")
+        document.getElementById("Folder_name").style.display = "block";
+        document.querySelector("#modal-form-btn").setAttribute("rootFolder", selected_objs[i].getAttribute("id"))
+        document.querySelector("#modal-form-btn").setAttribute("obj-type", 'Folder')
+      }
+    }
+  }
+  function add_root_folder(){
+    document.querySelector("#modal-container").style.display = "block"
+    document.querySelector("#modal-text").innerText = "new Folder"
+    document.getElementById("Folder_name").classList.add("active-form")
+    document.getElementById("Folder_name").style.display = "block";
+    document.querySelector("#modal-form-btn").setAttribute("rootFolder", "root")
+    document.querySelector("#modal-form-btn").setAttribute("obj-type", 'Folder')
   }
   function get_root_folder(folder){
     var parent = folder.parentNode.parentNode;
@@ -238,30 +261,28 @@
                         $('#folder-root').val(),
                         $('.modal-input').val());
   }
-  function delete_obj(objType, grandRoot, RootFolder, objName) {
+  function delete_obj(objType, RootFolder, objName) {
     update_tree_request("{% url 'update-folders' %}",
                         'Delete', objType,
-                        grandRoot,
                         RootFolder,
                         objName);
   }
-  function update_tree_request(url_req, act, create_obj, grandroot, root, objName){
+  function update_tree_request(url_req, act, create_obj, root, objName){
     $.ajax({
       url: url_req,
       type: 'POST',
-      data: {
+      data:{
         csrfmiddlewaretoken: '{{ csrf_token }}',
-        action: act,
-        create_method: create_obj,
-        root_root: grandroot,
-        root: root,
+        root_folder: root,
+        obj_type: create_obj,
         name: objName,
+        action: act
       },
       success: function(response) {
         document.querySelector('#modal-container').style.display = "none";
         $.get('/notes/', function(data) {
           var my_element = response.folder_id
-          $(my_element).replaceWith($(my_element, data));
+          $("#rootF").replaceWith($("#rootF", data));
           load_openned_folders()
         });
         if (document.getElementById('header').innerText == objName) {
@@ -274,6 +295,15 @@
 
   }
 
+  $(document).on('submit', '#modal-form', function(e){
+    e.preventDefault();
+    console.log('submitting...');
+    update_tree_request("{% url 'update-folders' %}",
+                        'create', document.getElementById("modal-form-btn").getAttribute('obj-type'),
+                        document.getElementById("modal-form-btn").getAttribute('rootFolder'),
+                        $(".active-form").val());
+  })
+
   function close_modal(){
     document.querySelector('#modal-container').style.display = "none";
   }
@@ -284,12 +314,11 @@
       type: "GET",
       url: '{% url "get-notes" %}',
       data:{
-        note_pk:file_pk
+        note_pk:file_pk.toString()
       },
       dataType: 'json',
       success: function (data){
         if (data.msg == 'success'){
-          console.log('note received');
           document.querySelector("#header h2").innerText = filename
           var content_area = document.querySelector('.note-content');
           content_area.setAttribute("filePK", file_pk)
@@ -300,6 +329,15 @@
         }
       }
     });
+  }
+
+  function toggle_spellcheck(){
+    let note_area = document.querySelector(".note-content").getAttribute("spellcheck")
+    if (note_area == "true"){
+      document.querySelector(".note-content").setAttribute("spellcheck", "false")
+    }else {
+      document.querySelector(".note-content").setAttribute("spellcheck", "true")
+    }
   }
 </script>
 
@@ -321,7 +359,6 @@
     for (var i = 0; i < heights.length; i++) {
       var height = heights[i].offsetHeight
       if ((height%size) != 0 && heights[i].querySelector('img')) {
-        console.log(height)
         var new_h = (height + (size - (height%size)))
         heights[i].style.height = new_h+"px"
       }
@@ -332,7 +369,7 @@
       var openned_folders = sessionStorage.getItem("Openned Folders").split(",")
       for (var i = 0; i < openned_folders.length; i++) {
         var opennedFN = openned_folders[i]
-        var folder = document.querySelector(`div[foldername="${opennedFN}"]`)
+        var folder = document.querySelector(`div[id="${opennedFN}"]`)
         var folder_child = folder.querySelector(".child-container")
         var folder_input = folder.querySelector("input")
         folder_child.style.display = "block";
@@ -353,9 +390,8 @@
 
     //Update Note Content
     if (sessionStorage.getItem("Openned File pk")){
-      console.log("Getting File");
       var file_list = sessionStorage.getItem("Openned File pk").split(",")
-      get_file(file_list[0], file_list[1])
+      get_file(file_list.slice(0, -1), file_list.slice(-1))
     }
   });
   function selectObject(object) {
@@ -376,14 +412,18 @@
     var obj_names = []
     for (var i = 0; i < openned.length; i++) {
       var openned_child = openned[i]
-      var openned_foldername = openned_child.parentNode.getAttribute("foldername")
+      var openned_foldername = openned_child.parentNode.getAttribute("id")
       obj_names.push(openned_foldername)
     }
     sessionStorage.setItem("Openned Folders", obj_names)
   }
   function open_child(e){
-    if (e.target.tagName == 'INPUT') {
-      var folder_node = e.target.parentNode.parentNode
+    if (e.target.tagName == 'INPUT' || e.ctrlKey) {
+      if (e.target.tagName == 'INPUT') {
+        var folder_node = e.target.parentNode.parentNode
+      } else {
+        var folder_node = e.target.parentNode
+      }
       var child_nodes = folder_node.querySelector(".child-container")
 
       if (!window.ctrl_pressed) {
@@ -398,7 +438,6 @@
         update_session_style()
       }
       else {
-        console.log("openning");
         if (e.target.checked) {
           e.target.checked = false;
         }else {

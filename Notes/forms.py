@@ -7,5 +7,14 @@ class FolderForm(ModelForm):
         model = Folders
         fields = ['name',]
         widgets = {
-            'name': forms.TextInput(attrs={'class': 'modal-input'})
+            'name': forms.TextInput(attrs={'class': 'modal-input',
+                                           'id': 'Folder_name'})
+        }
+class NoteForm(ModelForm):
+    class Meta:
+        model = Notes
+        fields = '__all__'
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'modal-input',
+                                           'id': 'File_name'})
         }

@@ -18,6 +18,7 @@ def createTask(request):
         task_instance.details = request.POST['taskDetail']
         year, month, day = request.POST['taskDate'].split('-')
         task_instance.date = datetime.date(int(year), int(month), int(day))
+        task_instance.owner = request.user
         task_instance.save()
 
         return JsonResponse({
@@ -40,14 +41,22 @@ def getTasksData(request):
         this_day = int(request.POST['tasks_day'])
         this_month = int(request.POST['tasks_month'])
         this_year = int(request.POST['tasks_year'])
-
-        this_tasks = Task.objects.filter(date=datetime.date(this_year,
-                                                         this_month,
-                                                         this_day))
         task_dict = {}
-        for task in this_tasks:
-            task_dict[task.name] = task.completed
-        print(this_tasks)
+
+        if int(request.POST.get("task_view")) == 0:
+            this_tasks = Task.objects.filter(owner=request.user,
+                                             date=datetime.date(this_year,
+                                                                this_month,
+                                                                this_day)).order_by('completed')
+            for task in this_tasks:
+                task_dict[task.name] = task.completed
+        elif int(request.POST.get("task_view")) == 1:
+            this_tasks = Task.objects.filter(completed=False, owner=request.user).order_by('date')
+            for task in this_tasks:
+                task_dict[task.name] = "{}/{}/{}".format(task.date.month,
+                                                         task.date.day,
+                                                         task.date.year)
+
         return JsonResponse({
             'msg': 'success',
             'tasks': task_dict
@@ -55,18 +64,18 @@ def getTasksData(request):
 
 def updateTasks(request):
     if request.method == "POST":
-        #print(request.POST)
         TaskList = json.loads(request.POST['newtaskList'])
         print(TaskList)
         for key in TaskList:
-            task_instance = Task.objects.get(name=key)
-            task_instance.completed = TaskList[key]
+            year, month, day = TaskList[key][1].split("-")
+            task_date = datetime.date(int(year), int(month), int(day))
+            task_instance = Task.objects.get(name=key, date=task_date)
+            task_instance.completed = TaskList[key][0]
             task_instance.save()
 
         return JsonResponse({
             'msg':'success'
         })
-
 
 def getDaySchedule(request):
     if request.method == 'POST':
