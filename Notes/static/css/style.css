@@ -24,6 +24,9 @@ html, body{
   height: 1px;
   background: white;
 }
+.hidden{
+  display: none;
+}
 
 
 /* || Notes Styles */

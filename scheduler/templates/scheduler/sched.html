@@ -262,7 +262,7 @@
 
         let list_remove_btn = document.createElement("BUTTON")
         list_remove_btn.setAttribute("class", "remove-task-btn")
-        list_remove_btn.setAttribute("onclick", "removeList(event)")
+        list_remove_btn.setAttribute("onclick", "moreList(event)")
         list_remove_btn.innerText = "-"
 
         if (task_dict[task_name] == true){
@@ -297,7 +297,6 @@
         task_date = `${temp_year}-${pad(temp_day, 2)}-${pad(temp_month, 2)}`
       }else {
         task_date = e.target.parentNode.parentNode.parentNode.getAttribute("date")
-        console.log(task_date);
       }
       $.ajax({
         type: "post",
@@ -318,6 +317,42 @@
         }
       })
     }
+  }
+
+  function moreList(e){
+    let task_name = e.target.parentNode.querySelector(".text").innerText
+    let temp_day, temp_month, temp_year
+    if (document.querySelector("select[name='display-sub']").value == "1") {
+      [temp_month, temp_day, temp_year] = e.target.parentNode.querySelector("span.date-span").getAttribute('date').split("/")
+    }else {
+      [temp_year, temp_month, temp_day] = e.target.parentNode.parentNode.parentNode.getAttribute("date").split("-")
+    }
+    $.ajax({
+      type: "post",
+      url: "{% url 'get-task' %}",
+      data:{
+        csrfmiddlewaretoken: '{{ csrf_token }}',
+        tasks_name: e.target.parentNode.querySelector("span.text").innerText,
+        tasks_day: temp_day,
+        tasks_month: temp_month,
+        tasks_year: temp_year,
+        task_view: 3000
+      },
+      dataType: 'json',
+      success: function(data){
+        if (data.msg == "success"){
+          let modal_cont = document.querySelector("#modal-container")
+
+          console.log(data.DataName);
+          console.log(data.DataDetails);
+          console.log(data.DataDate);
+          console.log(data.DataCompleted);
+
+          modal_cont.style.display = "block";
+          modal_cont.querySelector("input#task-name").value = data.DataName
+        }
+      }
+    })
   }
 
   function pad(num, size) {

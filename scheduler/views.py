@@ -43,7 +43,20 @@ def getTasksData(request):
         this_year = int(request.POST['tasks_year'])
         task_dict = {}
 
-        if int(request.POST.get("task_view")) == 0:
+        if int(request.POST.get("task_view")) == 3000:
+            this_task = Task.objects.get(owner=request.user,
+                                         name=request.POST["tasks_name"],
+                                         date=datetime.date(this_year,
+                                                            this_month,
+                                                            this_day))
+            return JsonResponse({
+                'msg': "success",
+                'DataName': this_task.name,
+                "DataDetails": this_task.details,
+                'DataDate': this_task.date,
+                'DataCompleted': this_task.completed
+            })
+        elif int(request.POST.get("task_view")) == 0:
             this_tasks = Task.objects.filter(owner=request.user,
                                              date=datetime.date(this_year,
                                                                 this_month,
