@@ -8,7 +8,7 @@ def register(request):
             form.save()
             print('Saving User')
 
-            return redirect('notes')
+            return redirect('dash')
     else:
         form = UserRegistrationForm()
 

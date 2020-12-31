@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from .models import Task, scheduleObject
 import json
@@ -6,17 +6,26 @@ import operator
 import datetime
 
 def sched(request):
-    context = {
-        'title': 'Calendar',
-    }
-    return render(request, 'scheduler/sched.html', context=context)
+    if request.user.is_authenticated:
+        context = {
+            'title': 'Calendar',
+        }
+        return render(request, 'scheduler/sched.html', context=context)
+
+    else:
+        return redirect('login')
 
 def createTask(request):
     if request.method == "POST":
+        if Task.objects.filter(name=request.POST['name']).exists():
+            return JsonResponse({
+                'msg': 'name repeated'
+            })
+
         task_instance = Task()
-        task_instance.name = request.POST['taskName']
-        task_instance.details = request.POST['taskDetail']
-        year, month, day = request.POST['taskDate'].split('-')
+        task_instance.name = request.POST['name']
+        task_instance.details = request.POST['details']
+        year, month, day = request.POST['date'].split('-')
         task_instance.date = datetime.date(int(year), int(month), int(day))
         task_instance.owner = request.user
         task_instance.save()
@@ -27,63 +36,54 @@ def createTask(request):
 
 def removeTask(request):
     if request.method == "POST":
-        taskName = request.POST['taskName']
-        year, month, day = request.POST['taskDate'].split("-")
+        taskName = request.POST['task_name']
+        year, month, day = request.POST['task_date'].split("-")
 
-        Task.objects.get(name=taskName, date=datetime.date(int(year), int(month), int(day))).delete()
+        Task.objects.get(owner=request.user,
+                         name=taskName,
+                         date=datetime.date(int(year), int(month), int(day))).delete()
 
         return JsonResponse({
             'msg': 'success'
         })
 
 def getTasksData(request):
-    if request.method == "POST":
-        this_day = int(request.POST['tasks_day'])
-        this_month = int(request.POST['tasks_month'])
-        this_year = int(request.POST['tasks_year'])
-        task_dict = {}
+    if request.method == "GET":
+        data_task_list = []
+        # If view Mode 1, send all unfinished Tasks
+        if request.GET['view_mode'] == '0':
+            UFTasks = Task.objects.filter(completed=False,
+                                          owner=request.user).order_by("date")
+            for task in UFTasks:
+                data_task_list.append([task.name, task.completed,
+                                       task.date, task.details])
 
-        if int(request.POST.get("task_view")) == 3000:
-            this_task = Task.objects.get(owner=request.user,
-                                         name=request.POST["tasks_name"],
-                                         date=datetime.date(this_year,
-                                                            this_month,
-                                                            this_day))
-            return JsonResponse({
-                'msg': "success",
-                'DataName': this_task.name,
-                "DataDetails": this_task.details,
-                'DataDate': this_task.date,
-                'DataCompleted': this_task.completed
-            })
-        elif int(request.POST.get("task_view")) == 0:
-            this_tasks = Task.objects.filter(owner=request.user,
-                                             date=datetime.date(this_year,
-                                                                this_month,
-                                                                this_day)).order_by('completed')
-            for task in this_tasks:
-                task_dict[task.name] = task.completed
-        elif int(request.POST.get("task_view")) == 1:
-            this_tasks = Task.objects.filter(completed=False, owner=request.user).order_by('date')
-            for task in this_tasks:
-                task_dict[task.name] = "{}/{}/{}".format(task.date.month,
-                                                         task.date.day,
-                                                         task.date.year)
+        elif request.GET['view_mode'] == '1':
+            month, day, year = request.GET['task_date'].split("/")
+
+            date_tasks = Task.objects.filter(owner=request.user,
+                                             date=datetime.date(int(year),
+                                                                int(month),
+                                                                int(day))).order_by('date')
+            for task in date_tasks:
+                data_task_list.append([task.name, task.completed,
+                                       task.date, task.details])
 
         return JsonResponse({
             'msg': 'success',
-            'tasks': task_dict
+            'task_data': data_task_list
         })
+
 
 def updateTasks(request):
     if request.method == "POST":
-        TaskList = json.loads(request.POST['newtaskList'])
-        print(TaskList)
-        for key in TaskList:
-            year, month, day = TaskList[key][1].split("-")
+        TaskList = json.loads(request.POST['tasks_list'])
+        for task in TaskList:
+            print(task)
+            year, month, day = task[1].split("-")
             task_date = datetime.date(int(year), int(month), int(day))
-            task_instance = Task.objects.get(name=key, date=task_date)
-            task_instance.completed = TaskList[key][0]
+            task_instance = Task.objects.get(name=task[0], date=task_date)
+            task_instance.completed = task[2]
             task_instance.save()
 
         return JsonResponse({
@@ -101,7 +101,7 @@ def getDaySchedule(request):
             if int(hr) > 12:
                 hr = int(hr) - 12
                 set = 'pm'
-            subj_dict[subj.name] = [str(hr), min, set]
+            subj_dict[subj.name] = [str(hr), min, set, subj.links]
 
         #subj_dict = sorted(subj_dict.values(), key=operator.itemgetter(0))
 

@@ -1,3 +1,22 @@
+/*===============
+  Contents:
+  1. General
+  2. Navbar
+  3. Sidebar
+  4. Dashboard
+  5. Notes
+  6. Schedule
+===============*/
+
+.test-color{
+  background: white;
+  color: black;
+  min-height: 50vh;
+}
+
+/*==========
+  General
+==========*/
 html, body{
   width: 100%;
   height: 100%;
@@ -29,13 +48,123 @@ html, body{
 }
 
 
-/* || Notes Styles */
-.wrapper{
+/*==========
+  Navbar
+==========*/
+#upper-navbar{
+  height: 3rem;
+  background: green;
+  padding: 2rem;
+}
+.left-navbar{
+  min-width: 0;
+  width: 0;
+  height: 100%;
+  position: fixed;
+  background: rgb(35, 36, 45);
+  z-index: 30;
+  color: white;
+  overflow: hidden;
+  transition: 500ms;
+}
+#upper-navbar h1{
+  margin-top: auto;
+}
+.left-navbar h1{
+  font-size: 2.5em;
+  padding: 0.5em;
+  text-align: center;
+}
+.nav-links a{
+  padding-left: 0.8em;
+  color: white;
+  text-decoration: none;
+}
+.nav-links li{
+  list-style: none;
+  margin: 4em 0 4em;
+}
+.link-list{
+  display: inline-block;
+}
+.link-list:hover{
+  color: white;
+}
+#noting::before{
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  content:  "\f518";
+  font-size: 2em;
+  padding-right: 0.2em;
+  vertical-align: -20%;
+  position: relative;
+  left: -3px;
+}
+#dates::before{
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  content:  "\f274";
+  font-size: 2em;
+  padding-right: 0.2em;
+  vertical-align: -15%;
+}
+#dash::before{
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  content:  "\f0db";
+  font-size: 2em;
+  padding-right: 0.2em;
+  vertical-align: -18%;
+}
+#navbar-item{
   display: flex;
-  height: 100vh;
+  width: 70vw;
+  margin-left: auto;
+  margin-right: auto;
+}
+h1, h2{
+  margin: 0;
+  padding: 0;
+}
+.navbar-btns{
+  margin: auto;
+  margin-right: 0;
+}
+.navbar-btns a{
+  margin: 0 1em 0;
+  padding-left: 0.4em;
+  text-decoration: none;
+  color: black;
+}
+.nav-head, .sidebar-head{
+  display: flex;
+  padding: 0.5em;
+}
+button[name="close-nav"]::before{
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  content: "\f00d";
+  color: white;
+  font-size: 2em;
+}
+button[name="open-nav"]::before{
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  content: "\f0c9";
+  color: black;
+  font-size: 2em;
+}
+button.toggle-nav{
+  border: none;
+  background: none;
+  cursor: pointer;
+  margin-right: 1em;
 }
 
-/* Sidebar Styles */
+
+/*==========
+  Sidebar
+==========*/
 .sidebar{
   min-width: var(--sidebar-width);
   background: #f0f0f0;
@@ -193,23 +322,23 @@ button[name="close-btn"]:hover{
   display: none;
 }
 
-/* main content Styles */
-.changes-button{
-  display: none;
-}
-.main-content{
-  width: 100%;
-  background: #f0f0f0;
-  color: black;
+
+
+/*==========
+  Dashboard
+==========*/
+.content{
   padding: 2rem;
-  overflow-y: auto;
-  font-size: 1.5rem;;
+  min-height: 100%;
 }
-.divider{
-  background: #323232;
+.dm{
+  background: #121212;
 }
 
-/* || Notes Styles */
+
+/*==========
+  Notes
+==========*/
 .highlight-class{
   background: rgb(249, 165, 66);
   opacity: 0.70;
@@ -327,149 +456,77 @@ button.btn-pointer:hover{
 }
 
 
-/* || Navbar */
-#upper-navbar{
-  height: 3rem;
-  background: green;
-  padding: 2rem;
-}
-.left-navbar{
-  min-width: 0;
-  width: 0;
-  height: 100%;
-  position: fixed;
-  background: rgb(35, 36, 45);
-  z-index: 30;
-  color: white;
-  overflow: hidden;
-  transition: 500ms;
-}
-#upper-navbar h1{
-  margin-top: auto;
-}
-.left-navbar h1{
-  font-size: 2.5em;
-  padding: 0.5em;
-  text-align: center;
-}
-.nav-links a{
-  padding-left: 0.8em;
-  color: white;
-  text-decoration: none;
-}
-.nav-links li{
-  list-style: none;
-  margin: 4em 0 4em;
-}
-#noting::before{
-  font-family: "Font Awesome 5 Free";
-  font-weight: 900;
-  content:  "\f518";
-  font-size: 2em;
-  padding-right: 0.2em;
-  vertical-align: -20%;
-  position: relative;
-  left: -3px;
-}
-#dates::before{
-  font-family: "Font Awesome 5 Free";
-  font-weight: 900;
-  content:  "\f274";
-  font-size: 2em;
-  padding-right: 0.2em;
-  vertical-align: -15%;
-}
-#dash::before{
-  font-family: "Font Awesome 5 Free";
-  font-weight: 900;
-  content:  "\f0db";
-  font-size: 2em;
-  padding-right: 0.2em;
-  vertical-align: -18%;
-}
-#navbar-item{
+
+/* || Notes Styles */
+.wrapper{
   display: flex;
-  width: 70vw;
-  margin-left: auto;
-  margin-right: auto;
-}
-h1, h2{
-  margin: 0;
-  padding: 0;
-}
-.navbar-btns{
-  margin: auto;
-  margin-right: 0;
-}
-.navbar-btns a{
-  margin: 0 1em 0;
-  padding-left: 0.4em;
-  text-decoration: none;
-  color: black;
-}
-.nav-head, .sidebar-head{
-  display: flex;
-  padding: 0.5em;
-}
-button[name="close-nav"]::before{
-  font-family: "Font Awesome 5 Free";
-  font-weight: 900;
-  content: "\f00d";
-  color: white;
-  font-size: 2em;
-}
-button[name="open-nav"]::before{
-  font-family: "Font Awesome 5 Free";
-  font-weight: 900;
-  content: "\f0c9";
-  color: black;
-  font-size: 2em;
-}
-button.toggle-nav{
-  border: none;
-  background: none;
-  cursor: pointer;
-  margin-right: 1em;
+  height: 100vh;
 }
 
 
-/* || Dashboard */
-.content{
+/* main content Styles */
+.changes-button{
+  display: none;
+}
+.main-content{
+  width: 100%;
+  background: #f0f0f0;
+  color: black;
   padding: 2rem;
-  height: 100%;
+  overflow-y: auto;
+  font-size: 1.5rem;;
+}
+.divider{
+  background: #323232;
 }
 
-/* || Schedules Styles */
+
+
+/*==========
+  Schedule
+==========*/
 .flex{
   display: flex;
 }
-#sched-ctrls{
-  display: flex;
+.right-panel{
+  width: 35%;
 }
 #calendar{
-  margin: 0.5em;
-  width: 50%;
+  margin: 0.5em 0.5em 2em;
+  width: 100%;
+}
+.schedule-container{
+  margin: 2em 0.5em 0.5em;
+  background: #242424;
+  border-radius: 25px;
+  width: 100%;
+}
+.schedule-header{
+  color: white;
+  background: rgb(38, 38, 38);
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  padding: 1.2em 0.75em 0.5em;
 }
 .calendar-content{
   box-shadow: 0 0 0.4em -2px black;
   border-radius: 10px;
 }
 .calendar-header{
-  background: rgb(93, 236, 241);
+  background: rgb(31, 31, 31);
+  color: white;
   padding: 1em;
   text-align: center;
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;
   position: relative;
 }
+#month-header{
+  color: #22D9FF;
+  text-decoration: none;
+}
 .prev-btn:hover, .next-btn:hover{
   cursor: pointer;
-  color: white;
-}
-.link-list{
-  display: inline-block;
-}
-.link-list:hover{
   color: white;
 }
 .prev-btn::before{
@@ -493,7 +550,8 @@ button.toggle-nav{
   top: 50%;
 }
 .calendar-view{
-  background: white;
+  background: rgb(43, 43, 43);
+  color: rgb(205, 205, 205);
   padding: 0.5em;
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
@@ -505,7 +563,7 @@ button.toggle-nav{
 .date-row > div{
   flex: 1;
   text-align: center;
-  border: 1px solid rgb(226, 226, 226);
+  border: 1px solid rgb(74, 71, 71);
 }
 .cell-date{
   position: relative;
@@ -521,7 +579,8 @@ button.toggle-nav{
   display: none;
 }
 .cell-date:hover{
-  background: rgb(242, 242, 242);
+  background: rgb(125, 124, 124);
+  color: black;
   cursor: pointer;
 }
 .my-dates{
@@ -530,58 +589,145 @@ button.toggle-nav{
   width: 100%;
   height: 100%;
 }
-.curr-date{
-  background: rgb(0, 240, 255);
+.select-date{
+  background: rgb(14, 161, 170);
+  color: rgb(227, 227, 227);
 }
 
 #details{
   margin: 0.5em;
-  background: white;
-  width: 50%;
-  height: 100%;
-  max-height: 125vh;
+  background: rgb(31, 31, 31);
+  color: white;
+  width: 65%;
   border-radius: 10px;
   box-shadow: 0 0 0.4em -2px black;
-  overflow-y: auto;
 }
 #header-container{
-  text-align: center;
-  background: rgb(101, 148, 250);
-  padding: 1em;
+  display: flex;
+  background: rgb(38, 41, 42);
+  color: white;
+  padding: 2em;
+  margin: 0;
+  border-top-right-radius: 10px;
+  border-top-left-radius: 10px;
+}
+.add-btn{
+  background: rgb(38, 41, 42);
+  border: none;
+  margin-left: 1em;
+}
+.add-btn:hover::before{
+  cursor: pointer;
+  color: rgb(30, 229, 249);
+}
+.task-viewer{
+  margin-left: auto;
+}
+.add-btn::before{
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  content:  "\f067";
+  color: rgb(191, 191, 191);
+}
+.option-btn::before{
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  content:  "\f054";
+  color: white;
+}
+.option-btn:focus{
+  outline:none;
+}
+.option::-moz-focus-inner{
+  border: 0;
+}
+.option-btn:focus{
+  border: none;
+}
+.dropdown::before{
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  content:  "\f078";
+  color: white;
+}
+.options-cont{
+  position: relative;
+}
+.options-cont button{
+  margin: 0;
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: none;
+  background: rgb(28, 28, 28);
+}
+.options-cont button:hover, button:hover::before{
+  background: rgb(30, 30, 30);
+  color: rgb(71, 206, 219);
+  cursor: pointer;
 }
 .remove-task-btn{
   float: right;
 }
+.detail-conntainer{
+  overflow-y: auto;
+  background: rgb(34, 34, 34);
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
 .detail-container > div{
   margin: 2em 2em 4em;
-}
-.detail-header{
-  display: flex;
 }
 .detail-header > h2{
   font-size: 2.2em;
 }
-button[name="update"]{
-  padding: 0.5em 1em 0.5em;
-  background: rgb(89, 255, 0);
-  margin-left: auto;
-  border: none;
-  border-radius: 8px;
+.update-btn{
   display: none;
 }
-button[name="update"]:hover{
-  cursor: pointer;
+.task-table{
+  width: 100%;
+  border-collapse: collapse;
+  margin-right: -0.5em;
 }
-.add-task{
-  margin-left: 1em;
-  margin-right: 1em;
-  background: white;
-  font-weight: 1000;
+.task-table th{
+  background: rgb(42, 42, 42);
+  padding: 1em 1.2em 0.7em;
+  text-align: left;
+  border-right: 1px solid #333333;
+}
+.task-table th:last-child{
   border: none;
 }
-.add-task:hover{
-  background: rgb(245, 245, 245);
-  cursor: pointer;
+.task-col{
+  background: rgb(28, 28, 28);
+  padding: 1.2em;
+}
+.status-link{
+  text-decoration: none;
+}
+.status-link:focus{
+  outline:none;
+}
+.status-link::-moz-focus-inner{
+  border: 0;
+}
+.fin{
+  color: rgb(76, 237, 92);
+}
+.unfin{
+  color: rgb(255, 50, 50);
+}
+.task-details{
+  background: rgb(25, 25, 25);
+  padding: 0;
+}
+.detail-div{
+  max-height: 0;
+  overflow: hidden;
+  transition: all ease 200ms;
+}
+.task-details h4{
+  margin: 0;
 }
 .task-item-list{
   list-style: none;
@@ -598,24 +744,39 @@ button[name="update"]:hover{
 }
 .sub-detail-container{
   display: block;
-  background: rgb(245, 245, 245);
+  background: rgb(34, 34, 34);;
   min-height: 250px;
   max-height: 300px;
   overflow-y: auto;
   padding: 0.5em;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
 }
 .sched-table{
   width: 100%;
   border-collapse: collapse;
-  background: white;
+  background: rgb(30, 30, 30);
+  color: white;
+}
+.body-sched{
+  color: rgb(210, 210, 210);
 }
 .sched-row:hover{
-  background: rgb(245, 245, 245);
+  background: rgb(55, 55, 55);
+}
+.class-link{
+  text-decoration: none;
+  color: rgb(210, 210, 210);
+}
+.class-link:hover{
+  color: rgb(74, 201, 255);
+}
 }
 .sched-table th{
-  border: 5px solid black;
-  padding: 0.5em;
+  background: rgb(38, 38, 38);
+  padding: 0.7em;
   text-align: left;
+  font-weight: 900;
 }
 .sched-table td{
   padding: 1em;

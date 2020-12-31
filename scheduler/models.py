@@ -14,6 +14,7 @@ class Task(models.Model):
 class scheduleObject(models.Model):
     name = models.CharField(max_length=100)
     weekday = models.CharField(max_length=50)
+    links = models.CharField(max_length=200, null=True, blank=True)
     time = models.TimeField()
 
     def __str__(self):

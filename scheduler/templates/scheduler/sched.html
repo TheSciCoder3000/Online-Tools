@@ -14,7 +14,7 @@
 {% endblock navbar_html %}
 
 {% block content %}
-<div class="content">
+<div class="content dm">
   <div id="modal-container">
     <div class="overlay"></div>
     <div class="modal-task-container">
@@ -27,54 +27,80 @@
           <label>Task Details</label>
           <textarea id="task-details" rows="8" cols="80"></textarea>
 
-          <input id="task-date" type="hidden" required value="">
+          <div id="date-cont">
+            <label>Date</label>
+            <input id="task-date" type="hidden" required value="">
+          </div>
         </fieldset>
         <button type="submit" name="button">Create</button>
       </form>
     </div>
   </div>
 
-  <div id="sched-ctrls">
-    <button type="button" name="button">test</button>
-    <button type="button" name="button">test</button>
-    <button type="button" name="button">test</button>
-    <button type="button" name="button">test</button>
-  </div>
   <div id="sched-content" class="flex">
-    <div id="calendar">
-      <div class="calendar-content">
-        <div class="calendar-header">
-          <h1 id="month-header">September</h1>
-          <h4 id="year-header">2020</h4>
-          <div class="calendar-btns">
-            <a onclick="prevCalendar()" class="prev-btn"></a>
-            <a onclick="nextCalendar()" class="next-btn"></a>
-          </div>
-        </div>
-        <div class="calendar-view">
-          <div class="date-row">
-            <div>SUN</div>
-            <div>MON</div>
-            <div>TUES</div>
-            <div>WED</div>
-            <div>THURS</div>
-            <div>FRI</div>
-            <div>SAT</div>
-          </div>
-          <div class="calendar-body">
+    <div id="details">
+      {% include 'scheduler/date_detail_template.html' with test="folder" %}
+    </div>
 
+    <div class="right-panel">
+      <div id="calendar" date="">
+        <div class="calendar-content">
+          <div class="calendar-header">
+            <h1><a id="month-header" href="#" onclick="returnCurrDate()">September</a></h1>
+            <h4 id="year-header">2020</h4>
+            <div class="calendar-btns">
+              <a onclick="prevCalendar()" class="prev-btn"></a>
+              <a onclick="nextCalendar()" class="next-btn"></a>
+            </div>
+          </div>
+          <div class="calendar-view">
+            <div class="date-row">
+              <div>SUN</div>
+              <div>MON</div>
+              <div>TUES</div>
+              <div>WED</div>
+              <div>THURS</div>
+              <div>FRI</div>
+              <div>SAT</div>
+            </div>
+            <div class="calendar-body">
+
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    <div id="details">
-      {% include 'scheduler/date_detail_template.html' with test="folder" %}
+
+      <div class="schedule-container">
+        <div class="schedule-header flex">
+          <h2>Schedules</h2>
+          <!--button type="button" name="update">Update</button-->
+        </div>
+        <hr>
+        <div class="sub-detail-container">
+          <table class="sched-table">
+            <thead>
+              <tr>
+                <th>Time:</th>
+                <th>Subjects</th>
+              </tr>
+            </thead>
+            <tbody class="body-sched">
+
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 {% endblock content %}
 
 {% block extra_script %}
+<!-- Calendar Logic -->
+<!--=============================================================
+This is used to update the schedule container found in the bottom
+right of the screen
+==============================================================-->
 <script>
   var months = ["January", "Febuary", "March", "April", "May", "June",
                 "July", "August", "September", "October", "November", "December"]
@@ -108,49 +134,91 @@
   }
 
   function updateCalendar(month, year){
-    let daysofMonth = new Date(year, month, 0).getDate();
-    let date = new Date(year, month, 1);
-    let calendar_body = document.querySelector(".calendar-body")
-    calendar_body.innerHTML = ""
+    // Pre-initalization
+    let daysofMonth = new Date(year, month, 0).getDate()   // get the number of days in a month
+    let date = new Date(year, month, 1)  // create a date object of the month and year parameter
+    let calendar_body = document.querySelector(".calendar-body") // reference the calendar body html container
+    calendar_body.innerHTML = ""  // clears the contents of the calendar body
 
-    while(month == date.getMonth()){
-      var row = document.createElement("DIV")
-      row.setAttribute("class", "date-row")
+    while(month == date.getMonth()){      // The while loop ensures that the following lines of code will continue to run until the date object is no longer equal to the desired month
+      var row = document.createElement("DIV")    // Creates a html container for the weeks of a month
+      row.setAttribute("class", "date-row")      // adds a "date-row" class for styling purposes
+
+      // Loop 7 times to initialize and adds the days of the week
       for(let j = 0; j < 7; j++){
-        if(j == date.getDay() && month == date.getMonth()){
+        // Check if dau indx is equal to the day of the date
+        if(j == date.getDay() && month == date.getMonth()){      // ensures that the col indx is equal to the indx of the dates in the first and last weeks of the month
           let curr_date = new Date()
-          let cell = document.createElement("DIV")
-          let cell_container = document.createElement("DIV")
-          cell.setAttribute("class", "cell-date")
+          let cell = document.createElement("DIV")    // Creates the parent container of the date cell
+          let cell_container = document.createElement("DIV")    // creates a child container of the date cell
+          cell.setAttribute("class", "cell-date")    // adds the attribute "cell-date" to cell
+
+
+          // Add Select-Class to cell date if current date
           if (date.getDate() == curr_date.getDate() && date.getMonth() == curr_date.getMonth() && date.getYear() == curr_date.getYear()) {
-            cell.classList.add("curr-date");
+            cell.classList.add("select-date");
+            cell.classList.add("curr-date")
           }
-          cell_container.setAttribute("class", "my-dates")
-          cell_container.innerText = date.getDate()
-          cell.addEventListener("dblclick", function(){
-            document.querySelector("select[name='display-sub']").value = "0"
-            getTask(new Date(year, month, cell_container.innerText))
-            getDaySchedule(new Date(year, month, cell_container.innerText).getDay())
+
+
+          cell_container.setAttribute("class", "my-dates")      // adds the attribute "my-dates" to cell container
+          cell_container.innerText = date.getDate()             // adds the text date to the cell container
+
+
+          // Add EventListeners to each cell Date
+          cell.addEventListener("dblclick", function(e){
+            console.log("dbclick");
+            let date_obj = new Date(year, month, cell_container.innerText)
+
+            // Add the select-class to the date
+            if (document.querySelector(".select-date") != null){     // This is to avoid getting an error when there is no select date
+              document.querySelector(".select-date").classList.remove("select-date")
+            }
+            e.target.parentNode.classList.add("select-date")    // adds the "select-date" class to the clicked cell
+
+            // Update Date Attribute
+            document.getElementById("calendar").setAttribute("date", date_obj.toLocaleDateString())
+
+            // Change Task View mode to "This Date Only"
+            document.querySelector(".task-viewer").value = 1
+            view_mode_change()
+
+            // update the form date field
+            document.querySelector("#task-date").value = `${date_obj.getFullYear()}-${date_obj.getMonth()+1}-${date_obj.getDate()}`
+
+            // getTask(new Date(year, month, cell_container.innerText))
+            getDaySchedule(date_obj.getDay())
           })
-          //cell.setAttribute("ondbclick", `getTask(new Date(${year},${month},${cell_container.innerText}))`)
           cell.appendChild(cell_container)
 
+          // Increment Date indx for the next loop
           date.setDate(date.getDate() + 1);
           row.appendChild(cell)
-        }else{
+        }
+        else{ // Else  create an empty div
           let cell = document.createElement("DIV")
           row.appendChild(cell)
         }
       }
+
+      // Append the week row to the Calendar Body
       calendar_body.appendChild(row)
     }
   }
 
+
+
   var curr_date = new Date()
-  document.getElementById("month-header").innerText = months[curr_date.getMonth()]
-  updateCalendar(curr_date.getMonth(), curr_date.getFullYear())
+  document.getElementById("calendar").setAttribute("date", curr_date.toLocaleDateString())   // Update the date attribute of the calendar container
+  document.getElementById("month-header").innerText = months[curr_date.getMonth()]    // Update the calendar Month text
+  updateCalendar(curr_date.getMonth(), curr_date.getFullYear())      // Update the calendar dates
 </script>
+
+
+
+<!-- Task logic
 <script>
+
   $(document).on('submit', '#task-form', function(e){
     e.preventDefault();
 
@@ -186,7 +254,6 @@
       if (document.querySelector("select[name='display-sub']").value == "1") {
         let [temp_month, temp_day, temp_year] = document_tasks[i].querySelector(".date-span").getAttribute("date").split("/")
         task_date = `${temp_year}-${temp_month}-${temp_day}`
-        console.log(task_date);
       }else {
         task_date = document.querySelector("#header-container").innerText
       }
@@ -218,7 +285,7 @@
   function updateServerTask(){
     $.ajax({
       type: "POST",
-      url: '{% url "update-task" %}',
+      url: '{% url "update-tasks" %}',
       data: {
         csrfmiddlewaretoken: '{{csrf_token}}',
         newtaskList: JSON.stringify(createTaskDict())
@@ -343,7 +410,10 @@
         if (data.msg == "success"){
           let modal_cont = document.querySelector("#modal-container")
 
-          console.log(data.DataName);
+
+
+
+          (data.DataName);
           console.log(data.DataDetails);
           console.log(data.DataDate);
           console.log(data.DataCompleted);
@@ -404,8 +474,312 @@
     getTask(new Date(year, month-1, day))
   }
 </script>
+-->
+
+
+
+<!-- New Task Logic -->
+<!--=============================================================
+This is used to update the schedule container found in the bottom
+right of the screen
+==============================================================-->
+<script>
+  // HTML functions
+  function returnCurrDate(){// Activates when clicked to switch the calendar instance to the current date
+    getTaskData(1, curr_date.toLocaleDateString())
+
+    document.querySelector(".select-date").classList.remove("select-date")
+    document.querySelector(".curr-date").classList.add("select-date")
+    document.getElementById("calendar").setAttribute("date", curr_date.toLocaleDateString())
+  }
+
+  function toggleOptions(e){// Toggle the details and options of each task
+    let detail_row = e.target.parentNode.parentNode.nextSibling
+    let opt_btn = e.target
+    if (opt_btn.classList.contains("dropdown")){
+      opt_btn.classList.remove("dropdown")
+      detail_row.querySelector(".detail-div").style.maxHeight = "0"
+      detail_row.querySelector(".task-details").style.transitionDelay = "195ms"
+      detail_row.querySelector(".task-details").style.padding = "0"
+    } else {
+      opt_btn.classList.add("dropdown")
+      detail_row.querySelector(".task-details").style.transitionDelay = "0ms"
+      detail_row.querySelector(".task-details").style.padding = "1.2em 1.2em 1.2em 3em"
+      detail_row.querySelector(".detail-div").style.maxHeight = "25em"
+    }
+  }
+  function evalTasks(){// Used to find if there are any edited tasks
+    let edited_tasks = document.querySelectorAll(".changed")
+    if (edited_tasks.length > 0) {
+      document.querySelector(".update-btn").style.display = "block"
+    } else {
+      document.querySelector(".update-btn").style.display = "none"
+    }
+  }
+  function changeStatus(e){// Styling function for changing the task status
+    let status_link = e.target
+
+    // Style Manipulation
+    if (status_link.classList.contains("fin")){
+      status_link.classList.remove("fin")
+      status_link.classList.add("unfin")
+      status_link.innerText = "Unfinished"
+    } else {
+      status_link.classList.remove("unfin")
+      status_link.classList.add("fin")
+      status_link.innerText = "Finished"
+    }
+
+    // Edited Inventory
+    if (status_link.classList.contains("changed")){
+      status_link.classList.remove("changed")
+    } else {
+      status_link.classList.add("changed")
+    }
+    evalTasks()
+  }
+  function addTask(){
+    document.getElementById("modal-container").style.display = "block"
+    let view_mode = document.querySelector(".task-viewer").value
+    if(view_mode == "0"){
+      document.querySelector("#date-cont").style.display = "block";
+      document.querySelector("#task-date").setAttribute("type", "date")
+    }else{
+      document.querySelector("#date-cont").style.display = "none";
+      document.querySelector("#task-date").setAttribute("type", "hidden")
+    }
+  }
+  function delete_task(e){
+    let task_row = e.target.parentNode.parentNode.parentNode.previousSibling
+    let delete_name = task_row.querySelector(".col-name").innerText
+    let delete_date = task_row.querySelector(".col-date").getAttribute("date")
+
+    if (confirm("Are you sure you want to delete this task?")){
+      $.ajax({
+        type: "POST",
+        url: "{% url 'remove-task' %}",
+        dataType: "json",
+        data:{
+          csrfmiddlewaretoken: "{{ csrf_token }}",
+          task_name: delete_name,
+          task_date: delete_date
+        },
+        success: function (data){
+          if (data.msg == "success"){
+            console.log("deletion complete");
+            let view_mode = document.querySelector(".task-viewer").value
+            let view_date
+            if(view_mode == "0"){
+              view_date = null
+            }else {
+              view_date = document.querySelector("#calendar").getAttribute("date")
+            }
+            getTaskData(parseInt(view_mode), view_date)
+          }
+        }
+      })
+    }
+    //console.log(e.target.parentNode.previousSibling.innerText);
+  }
+  function updateTasks(){
+    let edited_tasks = document.querySelectorAll(".changed")
+    let edited_array = []
+    for (var i = 0; i < edited_tasks.length; i++) {
+      let Etask_name = edited_tasks[i].parentNode.previousSibling.innerText
+      let Etask_date = edited_tasks[i].parentNode.nextSibling.getAttribute("date")
+      let Etask_status
+      if(edited_tasks[i].innerText == "Finished"){
+        Etask_status = true
+      } else {
+        Etask_status = false
+      }
+      edited_array.push([Etask_name, Etask_date, Etask_status])
+    }
+
+    $.ajax({
+      type: "POST",
+      url: "{% url 'update-tasks' %}",
+      dataType: "json",
+      data: {
+        csrfmiddlewaretoken: "{{ csrf_token }}",
+        tasks_list: JSON.stringify(edited_array)
+      },
+      success: function (data){
+        if(data.msg == "success"){
+          console.log("tasks has been updated");
+          document.querySelector(".update-btn").style.display =  "none"
+          if (document.querySelector(".task-viewer").value == "0") {
+            let finished_tasks = document.querySelectorAll(".fin")
+            for (var i = 0; i < finished_tasks.length; i++) {
+              fin_task = finished_tasks[i].parentNode.parentNode
+              fin_task.nextSibling.remove()
+              fin_task.remove()
+            }
+          }
+        }
+      }
+    })
+  }
+  function getTaskData(task_vm, taskDate){
+    // Send Ajax request to the server to get the task data
+    $.ajax({
+      type: "get",
+      url: "{% url 'get-task' %}",
+      dataType: 'json',
+      data:{
+        view_mode: task_vm,
+        task_date: taskDate
+      },
+      success: function (data){
+        if(data.msg == "success"){
+          let table_body = document.querySelector(".task-table tbody")
+          table_body.innerHTML = ''
+
+          // Loop through every task and put them in the website
+          for (var i = 0; i < data.task_data.length; i++) {
+            let [year, month, day] = data.task_data[i][2].split("-")
+            let date_instance = new Date(year, month-1, day)
+
+            // Create a table row
+            let table_row = document.createElement("TR")
+
+            // Create table columns for inside the row
+            let col_name = document.createElement("TD")
+            col_name.classList.add("task-col")
+            col_name.classList.add("col-name")
+            col_name.innerText = data.task_data[i][0]
+
+            let col_status = document.createElement("TD")
+            let status_link = document.createElement("A")
+            col_status.classList.add("task-col")
+            status_link.classList.add("status-link")
+            status_link.setAttribute("href", "#")
+            status_link.addEventListener("click", changeStatus)
+            if(data.task_data[i][1]){
+              status_link.innerText = 'Finished'
+              status_link.classList.add("fin")
+            } else {
+              status_link.innerText = 'Unfinished'
+              status_link.classList.add("unfin")
+            }
+            col_status.appendChild(status_link)
+
+            let col_date = document.createElement("TD")
+            col_date.classList.add("task-col")
+            col_date.classList.add("col-date")
+            col_date.setAttribute("date", `${year}-${month}-${day}`)
+            col_date.innerText = `${months[month-1]} ${day}`
+
+            let modify_cont = document.createElement("TD")
+            modify_cont.classList.add("task-col")
+            modify_cont.classList.add("options-cont")
+            let option_btn = document.createElement("BUTTON")
+            option_btn.classList.add("option-btn")
+            option_btn.addEventListener("click", toggleOptions)
+            modify_cont.appendChild(option_btn)
+
+            // Inserting the columns inside the row
+            table_row.appendChild(col_name)
+            table_row.appendChild(col_status)
+            table_row.appendChild(col_date)
+            table_row.appendChild(modify_cont)
+
+            table_body.appendChild(table_row)
+
+            // Creating the detail row and its elements
+            let detail_row = document.createElement("TR")
+            let detail_col = document.createElement("TD")
+            let detail_div = document.createElement("DIV")
+            detail_div.classList.add("detail-div")
+            detail_col.setAttribute("colspan", "4")
+            detail_col.classList.add("task-details")
+
+            let detail_cell = document.createElement("DIV")
+            let header_details = document.createElement("H4")
+            let p_details = document.createElement("P")
+            header_details.innerText = "Details:"
+            detail_cell.appendChild(header_details)
+            p_details.innerText = data.task_data[i][3]
+            detail_cell.appendChild(p_details)
+            detail_div.appendChild(detail_cell)
+
+            let days_rem_cell = document.createElement("DIV")
+            let header_DR = document.createElement("H4")
+            let p_DR = document.createElement("P")
+            header_DR.innerText = "Days Left:"
+            days_rem_cell.appendChild(header_DR)
+            p_DR.innerText = `${Math.round((date_instance-curr_date)/(1000*60*60*24))} days left`
+            days_rem_cell.appendChild(p_DR)
+            detail_div.appendChild(days_rem_cell)
+
+            let delete_btn = document.createElement("BUTTON")
+            delete_btn.classList.add("task-delete-btn")
+            delete_btn.innerText = "Delete"
+            delete_btn.addEventListener("click", delete_task)
+            detail_div.appendChild(delete_btn)
+
+            detail_col.appendChild(detail_div)
+            detail_row.appendChild(detail_col)
+            table_body.appendChild(detail_row)
+          }
+        }
+      }
+    })
+  }
+  function view_mode_change(){// Activates everytime the viewmode is changed
+    let view_select = document.querySelector(".task-viewer").value
+    let calendar_date = document.querySelector("#calendar").getAttribute("date")
+    getTaskData(parseInt(view_select), calendar_date)
+  }
+  function close_modal(){
+    document.getElementById("modal-container").style.display = "none"
+  }
+
+  // Backend processing
+  $(document).on("submit", "#task-form", function(e){
+    e.preventDefault();
+    let task_name = document.querySelector("#task-name").value
+    let task_details = document.querySelector("#task-details").value
+    let task_date = document.querySelector("#task-date").value
+
+    $.ajax({
+      type: "POST",
+      url: "{% url 'create-task' %}",
+      dataType: "json",
+      data:{
+        csrfmiddlewaretoken: "{{ csrf_token }}",
+        name: task_name,
+        details: task_details,
+        date: task_date
+      },
+      success: function(data){
+        if (data.msg == 'success') {
+          let view_mode = document.querySelector(".task-viewer").value
+          let view_date
+          if(view_mode == "0"){
+            view_date = null
+          }else {
+            view_date = document.querySelector("#calendar").getAttribute("date")
+          }
+          getTaskData(parseInt(view_mode), view_date)
+          document.querySelector("#modal-container").style.display = "none"
+        } else if (data.msg == "name repeated"){
+          alert("name already exists")
+          document.querySelector("#task-name").focus()
+        }
+      }
+    })
+  })
+  getTaskData(0, null)
+</script>
+
+
 
 <!-- Schedule logic -->
+<!--=============================================================
+This is used to update the schedule container found in the bottom
+right of the screen
+==============================================================-->
 <script>
   function getDaySchedule(weekday){
     let weekday_list = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday',
@@ -433,7 +807,16 @@
             row.appendChild(time_d)
 
             subj_d.setAttribute("class", "subj-col")
-            subj_d.innerText = subj
+            let class_link = document.createElement("A")
+            class_link.classList.add("class-link")
+            if (day_subjects[subj][3] == null){
+              class_link.setAttribute("href", "")
+            }else{
+              class_link.setAttribute("href", day_subjects[subj][3])
+            }
+            class_link.setAttribute("target", "_blank")
+            class_link.innerText = subj
+            subj_d.appendChild(class_link)
 
             row.setAttribute("class", "sched-row")
             row.appendChild(subj_d)

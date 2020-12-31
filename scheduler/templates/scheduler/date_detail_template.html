@@ -1,39 +1,38 @@
+<div id="header-container">
+  <h1>Tasks and Submissions</h1>
+  <button class="add-btn" onclick="addTask()" type="button"></button>
+  <button class="update-btn" onclick="updateTasks()" type="button">Update</button>
+  <select onchange="view_mode_change()" class="task-viewer">
+    <option value="0">All Submissions</option>
+    <option value="1">This Date Only</option>
+  </select>
+</div>
 <div class="detail-container">
-  <div id="header-container">
-    <h1></h1>
-  </div>
   <div class="task-container">
-    <div class="detail-header">
-      <h2>Submissions</h2>
-      <button onclick="add_task_modal()" type="button" class="add-task">+</button>
-      <select class="" onchange="sub_view_change()" name="display-sub">
-        <option value="0">This date only</option>
-        <option value="1">All Submissions</option>
-      </select>
-      <button id="task-update" onclick="updateServerTask()" type="button" name="update">Update</button>
-    </div>
-    <hr>
-    <div class="sub-detail-container">
-      <ul>
-      </ul>
-    </div>
-  </div>
-  <div class="schedule-container">
-    <div class="detail-header">
-      <h2>Schedules</h2>
-      <button type="button" name="update">Update</button>
-    </div>
-    <hr>
-    <div class="sub-detail-container">
-      <table class="sched-table">
+    <div class="sub-task-container">
+      <table class="task-table">
         <thead>
           <tr>
-            <th>Time:</th>
-            <th>Subjects</th>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Deadline Date</th>
+            <th></th>
           </tr>
         </thead>
-        <tbody class="body-sched">
 
+        <tbody>
+          <tr>
+            <td>Task # 1</td>
+            <td>Unfinished</td>
+            <td>Oct 6, 2020</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td>Task # 2</td>
+            <td>Finished</td>
+            <td>Oct 24, 2020</td>
+            <td></td>
+          </tr>
         </tbody>
       </table>
     </div>
