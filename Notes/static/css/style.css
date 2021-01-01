@@ -53,8 +53,10 @@ html, body{
 ==========*/
 #upper-navbar{
   height: 3rem;
-  background: green;
+  background: #2F2F2F;
   padding: 2rem;
+  border-bottom: 2px solid #44EB29;
+  color: #E1E1E1;
 }
 .left-navbar{
   min-width: 0;
@@ -69,6 +71,7 @@ html, body{
 }
 #upper-navbar h1{
   margin-top: auto;
+  font-size: 2rem;
 }
 .left-navbar h1{
   font-size: 2.5em;
@@ -85,10 +88,11 @@ html, body{
   margin: 4em 0 4em;
 }
 .link-list{
+  color: #cdcdcd;
   display: inline-block;
 }
 .link-list:hover{
-  color: white;
+  color: #31d416;
 }
 #noting::before{
   font-family: "Font Awesome 5 Free";
@@ -134,7 +138,7 @@ h1, h2{
   margin: 0 1em 0;
   padding-left: 0.4em;
   text-decoration: none;
-  color: black;
+  color: #bdbdbd;
 }
 .nav-head, .sidebar-head{
   display: flex;
@@ -330,6 +334,8 @@ button[name="close-btn"]:hover{
 .content{
   padding: 2rem;
   min-height: 100%;
+  background: #121212;
+  color: white;
 }
 .dm{
   background: #121212;
