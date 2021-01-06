@@ -1,22 +1,27 @@
-{% extends 'Notes/base.html' %}
 {% load static %}
-{% load crispy_forms_tags %}
-{% block navbar_html %}
-{% endblock navbar_html %}
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="{% static 'fa-style/css/all.css' %}">
+    <link rel="stylesheet" href="{% static 'css/user_styles.css' %}">
+    <title>Online Tool - Login</title>
+  </head>
+  <body>
+    <div class="login-content">
+      <div class="left-background">
 
-{% block content %}
-<div id="register-body">
-  <form class="user-container" method="post">{% csrf_token %}
-    <div>
-      {{ form|crispy }}
-    </div>
-    <div>
-      <button type="submit">Log In</button>
-    </div>
-  </form>
-</div>
-{% endblock content %}
+      </div>
+      <div class="right-login">
+        <h1 id="app-title">Online Tool Web App</h1>
 
-{% block add_style %}
-<link rel="stylesheet" href="{% static 'css/user_styles.css' %}">
-{% endblock add_style %}
+        <form class="login-form" action="{% url 'login' %}" method="post">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <button type="submit" name="login-btn">Log In</button>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>
