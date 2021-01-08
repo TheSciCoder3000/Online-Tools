@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="{% static 'fa-style/css/all.css' %}">
     <link rel="stylesheet" href="{% static 'css/user_styles.css' %}">
+    <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet'>
     <title>Online Tool - Login</title>
   </head>
   <body>
@@ -16,11 +17,13 @@
       <div class="right-login">
         <h1 id="app-title">Online Tool Web App</h1>
 
-        <form class="login-form" action="{% url 'login' %}" method="post">
-          {% csrf_token %}
-          {{ form.as_p }}
-          <button type="submit" name="login-btn">Log In</button>
-        </form>
+        <div class="form-container">
+          <form class="login-form" action="{% url 'login' %}" method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" name="login-btn">Log In</button>
+          </form>
+        </div>
       </div>
     </div>
   </body>

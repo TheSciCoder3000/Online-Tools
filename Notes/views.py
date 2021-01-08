@@ -1,25 +1,31 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from .models import Folders, Notes
 from .forms import FolderForm, NoteForm
 
 def dash(request):
-    context = {
-        'title': 'Dashboard'
-    }
-    return render(request, 'Notes/dashboard.html', context=context)
+    if request.user.is_authenticated:
+        context = {
+            'title': 'Dashboard'
+        }
+        return render(request, 'Notes/dashboard.html', context=context)
+    else:
+        return redirect('login')
 
 def notes(request):
-    form1 = FolderForm()
-    form2 = NoteForm()
-    context = {
-        'title': 'Notes',
-        'Folders': Folders.objects.all(),
-        'Notes': Notes.objects.all(),
-        'FolderForm': form1,
-        'NoteForm': form2,
-    }
-    return render(request, 'Notes/notes.html', context=context)
+    if request.user.is_authenticated:
+        form1 = FolderForm()
+        form2 = NoteForm()
+        context = {
+            'title': 'Notes',
+            'Folders': Folders.objects.all(),
+            'Notes': Notes.objects.all(),
+            'FolderForm': form1,
+            'NoteForm': form2,
+        }
+        return render(request, 'Notes/notes.html', context=context)
+    else:
+        return redirect('login')
 
 def update_notes(request):
     print('\n\nUpdating notes\n\n')
